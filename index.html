@@ -4,21 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ARCUS | Professional Video Editor & Visual Creator</title>
+  
+  <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     :root {
-      --bg: #090b10;
-      --card-bg: rgba(255, 255, 255, 0.03);
+      --bg: #07090e;
+      --card-bg: rgba(18, 22, 34, 0.65);
       --card-border: rgba(255, 255, 255, 0.08);
-      --accent: #8b5cf6;
-      --accent-glow: rgba(139, 92, 246, 0.35);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-glow: rgba(139, 92, 246, 0.3);
       --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      --text-muted: #94a3b8;
+      --gradient: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
     }
 
     * {
@@ -36,36 +39,47 @@
       overflow-x: hidden;
     }
 
-    /* Ambient Background Glow */
-    .glow-orb {
+    /* Ambient Background Glows */
+    .glow-1 {
       position: absolute;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-      top: -100px;
-      left: 50%;
-      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, transparent 70%);
+      top: -120px;
+      left: 10%;
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Navbar */
+    .glow-2 {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+      top: 400px;
+      right: 5%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navigation */
     nav {
       position: sticky;
       top: 0;
-      backdrop-filter: blur(12px);
-      background: rgba(9, 11, 16, 0.75);
+      backdrop-filter: blur(16px);
+      background: rgba(7, 9, 14, 0.8);
       border-bottom: 1px solid var(--card-border);
-      z-index: 100;
-      padding: 1rem 5%;
+      z-index: 1000;
+      padding: 1.1rem 6%;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .logo {
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 800;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       letter-spacing: 2px;
       background: var(--gradient);
       -webkit-background-clip: text;
@@ -88,20 +102,21 @@
     /* Hero Section */
     .hero {
       position: relative;
-      padding: 7rem 5% 5rem;
+      padding: 6.5rem 6% 4.5rem;
       text-align: center;
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
+      z-index: 1;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
+      gap: 10px;
+      padding: 7px 18px;
       border-radius: 999px;
       background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      border: 1px solid rgba(139, 92, 246, 0.35);
       color: #c084fc;
       font-size: 0.85rem;
       font-weight: 600;
@@ -113,15 +128,15 @@
       height: 8px;
       background: #22c55e;
       border-radius: 50%;
-      box-shadow: 0 0 8px #22c55e;
+      box-shadow: 0 0 10px #22c55e;
     }
 
     .hero h1 {
-      font-size: 3.2rem;
+      font-size: 3.4rem;
       font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 1.2rem;
-      letter-spacing: -1px;
+      line-height: 1.18;
+      margin-bottom: 1.3rem;
+      letter-spacing: -1.2px;
     }
 
     .hero h1 span {
@@ -131,43 +146,44 @@
     }
 
     .hero p {
-      font-size: 1.15rem;
+      font-size: 1.18rem;
       color: var(--text-muted);
       margin-bottom: 2.2rem;
-      max-width: 680px;
+      max-width: 720px;
       margin-left: auto;
       margin-right: auto;
     }
 
     .cta-group {
       display: flex;
-      gap: 1rem;
+      gap: 1.1rem;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .btn {
-      padding: 0.85rem 1.8rem;
-      border-radius: 10px;
+      padding: 0.9rem 1.9rem;
+      border-radius: 12px;
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       transition: all 0.3s ease;
       cursor: pointer;
+      font-size: 0.98rem;
     }
 
     .btn-primary {
       background: var(--gradient);
       color: #fff;
-      box-shadow: 0 8px 25px var(--accent-glow);
+      box-shadow: 0 8px 30px var(--accent-glow);
       border: none;
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 12px 35px rgba(139, 92, 246, 0.55);
     }
 
     .btn-secondary {
@@ -178,123 +194,240 @@
 
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.25);
     }
 
-    /* Section Global */
+    /* Softwares / Tools bar */
+    .tools-bar {
+      margin-top: 3.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tool-tag {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-tag i { color: #c084fc; }
+
+    /* Section Styling */
     section {
-      padding: 5rem 5%;
-      max-width: 1200px;
+      padding: 5.5rem 6%;
+      max-width: 1280px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     .section-title {
       text-align: center;
-      margin-bottom: 3.5rem;
+      margin-bottom: 2.8rem;
     }
 
     .section-title h2 {
-      font-size: 2.2rem;
-      font-weight: 700;
+      font-size: 2.4rem;
+      font-weight: 800;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
     }
 
     .section-title p {
       color: var(--text-muted);
-      font-size: 1rem;
+      font-size: 1.05rem;
     }
 
-    /* Services Grid */
+    /* Portfolio Category Tabs */
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 999px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    /* Project Grid Layout */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.35s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .project-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Video Frame Container */
+    .video-preview-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Landscape Aspect Ratio 16:9 */
+    .aspect-16-9 {
+      padding-top: 56.25%;
+    }
+
+    /* Vertical Reel Aspect Ratio 9:16 */
+    .aspect-9-16 {
+      padding-top: 130%;
+    }
+
+    .video-preview-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .project-body {
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+
+    .category-badge {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #c084fc;
+      margin-bottom: 0.4rem;
+    }
+
+    .project-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .open-btn:hover {
+      background: var(--gradient);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* Services Section */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+      gap: 1.6rem;
     }
 
     .service-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 2rem;
+      border-radius: 18px;
+      padding: 2.2rem;
       transition: all 0.3s ease;
-      position: relative;
     }
 
     .service-card:hover {
-      border-color: var(--accent);
+      border-color: var(--accent-purple);
       transform: translateY(-5px);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .icon-box {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
       background: rgba(139, 92, 246, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #c084fc;
-      font-size: 1.3rem;
-      margin-bottom: 1.2rem;
+      font-size: 1.4rem;
+      margin-bottom: 1.4rem;
     }
 
     .service-card h3 {
-      font-size: 1.25rem;
-      margin-bottom: 0.6rem;
+      font-size: 1.3rem;
+      margin-bottom: 0.7rem;
     }
 
     .service-card p {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.92rem;
     }
 
-    /* Portfolio Section */
-    .portfolio-box {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 2.5rem;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .portfolio-box h3 {
-      font-size: 1.6rem;
-      margin-bottom: 1rem;
-    }
-
-    .portfolio-box p {
-      color: var(--text-muted);
-      max-width: 650px;
-      margin: 0 auto 2rem;
-    }
-
-    .drive-banner {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: #1e1b4b;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      border: 1px solid #4338ca;
-      color: #e0e7ff;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .drive-banner:hover {
-      transform: scale(1.03);
-      border-color: #6366f1;
-    }
-
-    /* Contact Section */
+    /* Contact Cards */
     .contact-wrapper {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1.5rem;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
 
     .contact-card {
@@ -309,18 +442,18 @@
     }
 
     .contact-card:hover {
-      border-color: var(--accent);
+      border-color: var(--accent-purple);
       transform: translateY(-4px);
     }
 
     .contact-card i {
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: #c084fc;
       margin-bottom: 1rem;
     }
 
     .contact-card h4 {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       margin-bottom: 0.3rem;
     }
 
@@ -332,28 +465,30 @@
     /* Footer */
     footer {
       border-top: 1px solid var(--card-border);
-      padding: 2rem 5%;
+      padding: 2.5rem 6%;
       text-align: center;
       color: var(--text-muted);
       font-size: 0.9rem;
     }
 
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.3rem; }
+      .hero h1 { font-size: 2.4rem; }
       .nav-links { display: none; }
+      .projects-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <div class="glow-orb"></div>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
 
   <!-- Navbar -->
   <nav>
     <div class="logo">ARCUS</div>
     <div class="nav-links">
+      <a href="#showcase">Portfolio Work</a>
       <a href="#services">Services</a>
-      <a href="#showcase">Portfolio</a>
       <a href="#contact">Contact</a>
     </div>
   </nav>
@@ -361,17 +496,302 @@
   <!-- Hero Section -->
   <header class="hero">
     <div class="badge">
-      <span></span> Available for New Projects
+      <span></span> Available For Editing & Visual Direction
     </div>
-    <h1>Turn Raw Footage Into <span>Cinematic Impact</span></h1>
+    <h1>Turn Raw Footage Into <span>Cinematic Gold</span></h1>
     <p>
-      I am <strong>ARCUS</strong>, a professional video editor and visual creator specializing in high-retention video editing, visual storytelling, dynamic vlogs, and scroll-stopping graphic designs.
+      I am <strong>ARCUS</strong>, a professional video editor and visual creator specializing in high-retention social media reels, commercial ads, talking-head cuts, and modern graphic design.
     </p>
     <div class="cta-group">
       <a href="#showcase" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch My Work</a>
-      <a href="https://wa.me/918109780994?text=Hi%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="btn btn-secondary"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20want%20to%20hire%20you%20for%20a%20project!" target="_blank" class="btn btn-secondary"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+    </div>
+
+    <!-- Software Stack -->
+    <div class="tools-bar">
+      <div class="tool-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Adobe Premiere Pro</div>
+      <div class="tool-tag"><i class="fa-solid fa-film"></i> After Effects</div>
+      <div class="tool-tag"><i class="fa-solid fa-sliders"></i> DaVinci Resolve</div>
+      <div class="tool-tag"><i class="fa-solid fa-bezier-curve"></i> Photoshop & Illustrator</div>
     </div>
   </header>
+
+  <!-- Portfolio Showcase Section -->
+  <section id="showcase">
+    <div class="section-title">
+      <h2>Featured Productions</h2>
+      <p>Explore my recent video edits, commercials, talking-head videos, and graphic assets</p>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" onclick="filterGallery('all')">All Work</button>
+      <button class="tab-btn" onclick="filterGallery('reels')">Instagram Reels</button>
+      <button class="tab-btn" onclick="filterGallery('talking-head')">Talking Head</button>
+      <button class="tab-btn" onclick="filterGallery('commercial')">Commercial & App</button>
+      <button class="tab-btn" onclick="filterGallery('hospital-hotel')">Hospital & Hotel</button>
+      <button class="tab-btn" onclick="filterGallery('graphics')">Graphic Designs</button>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- 1. App Launching Video -->
+      <div class="project-card" data-category="commercial">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">App & Commercial</div>
+            <div class="project-title">App Launching Showcase</div>
+            <div class="project-desc">High-energy product launch cut featuring dynamic motion, UI mockups, and modern pacing.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. Instagram Reel 1 -->
+      <div class="project-card" data-category="reels">
+        <div class="video-preview-wrapper aspect-9-16">
+          <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Instagram Reel</div>
+            <div class="project-title">Viral Reel Edit #1</div>
+            <div class="project-desc">Fast-paced short-form edit built for maximum retention, beat-synced cuts, and visual hook.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. Instagram Reel 2 -->
+      <div class="project-card" data-category="reels">
+        <div class="video-preview-wrapper aspect-9-16">
+          <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Instagram Reel</div>
+            <div class="project-title">Viral Reel Edit #2</div>
+            <div class="project-desc">Engaging social reel featuring smooth transitions, subtitle animations, and sound effects.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 4. Instagram Reel 3 -->
+      <div class="project-card" data-category="reels">
+        <div class="video-preview-wrapper aspect-9-16">
+          <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Instagram Reel</div>
+            <div class="project-title">Viral Reel Edit #3</div>
+            <div class="project-desc">Impactful visual hook, dynamic zoom-ins, and color grade designed for high CTR.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 5. Talking Head 1 -->
+      <div class="project-card" data-category="talking-head">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Talking Head</div>
+            <div class="project-title">Talking Head Master #1</div>
+            <div class="project-desc">Clean speech cuts, seamless jump-cut masking, graphic popups, and audio balancing.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 6. Talking Head 2 -->
+      <div class="project-card" data-category="talking-head">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Talking Head</div>
+            <div class="project-title">Talking Head Master #2</div>
+            <div class="project-desc">Professional tone, narrative pacing, supporting B-roll integration, and text overlays.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 7. Talking Head 3 -->
+      <div class="project-card" data-category="talking-head">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Talking Head</div>
+            <div class="project-title">Talking Head Master #3</div>
+            <div class="project-desc">Retention-focused storytelling edit with smooth zooms and engaging motion graphics.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 8. Hospital Content 1 -->
+      <div class="project-card" data-category="hospital-hotel">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Hospital / Healthcare</div>
+            <div class="project-title">Healthcare Brand Story #1</div>
+            <div class="project-desc">Trustworthy corporate healthcare video with warm color tone and clear visual information.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 9. Hospital Content 2 -->
+      <div class="project-card" data-category="hospital-hotel">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Hospital / Healthcare</div>
+            <div class="project-title">Healthcare Brand Story #2</div>
+            <div class="project-desc">Informative medical storytelling edit designed for patient clarity and institutional trust.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 10. Hotel Content -->
+      <div class="project-card" data-category="hospital-hotel">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview" allow="autoplay"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Hospitality & Hotel</div>
+            <div class="project-title">Luxury Hotel Cinematic Tour</div>
+            <div class="project-desc">Atmospheric hospitality promo featuring fluid camera moves and rich ambiance.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in HD
+          </a>
+        </div>
+      </div>
+
+      <!-- 11. Graphic Design 1 -->
+      <div class="project-card" data-category="graphics">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Graphic Design</div>
+            <div class="project-title">Creative Visual Artwork #1</div>
+            <div class="project-desc">Bold typography, modern color composition, and brand identity design.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View High-Res
+          </a>
+        </div>
+      </div>
+
+      <!-- 12. Graphic Design 2 -->
+      <div class="project-card" data-category="graphics">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Graphic Design</div>
+            <div class="project-title">Promotional Visual Asset #2</div>
+            <div class="project-desc">High-converting social poster with polished layout and visual hierarchy.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View High-Res
+          </a>
+        </div>
+      </div>
+
+      <!-- 13. Graphic Design 3 -->
+      <div class="project-card" data-category="graphics">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Graphic Design</div>
+            <div class="project-title">Brand Creative Asset #3</div>
+            <div class="project-desc">Custom graphic artwork created for digital campaign rollouts.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View High-Res
+          </a>
+        </div>
+      </div>
+
+      <!-- 14. Graphic Design 4 -->
+      <div class="project-card" data-category="graphics">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Graphic Design</div>
+            <div class="project-title">Brand Creative Asset #4</div>
+            <div class="project-desc">Striking visual styling tailored for marketing creatives and social feeds.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View High-Res
+          </a>
+        </div>
+      </div>
+
+      <!-- 15. Graphic Design 5 -->
+      <div class="project-card" data-category="graphics">
+        <div class="video-preview-wrapper aspect-16-9">
+          <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview"></iframe>
+        </div>
+        <div class="project-body">
+          <div>
+            <div class="category-badge">Graphic Design</div>
+            <div class="project-title">Brand Creative Asset #5</div>
+            <div class="project-desc">Modern visual presentation and marketing banner composition.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="open-btn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View High-Res
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
 
   <!-- Services Section -->
   <section id="services">
@@ -384,58 +804,38 @@
       <div class="service-card">
         <div class="icon-box"><i class="fa-solid fa-scissors"></i></div>
         <h3>Video Editing</h3>
-        <p>Dynamic pacing, seamless sound design, color grading, and modern motion graphics built for audience retention.</p>
+        <p>Dynamic pacing, sound design, punchy transitions, and color grading built for maximum audience retention.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-mobile-screen"></i></div>
+        <h3>Viral Reels & Shorts</h3>
+        <p>High-energy vertical video editing with bold captions, visual effects, and sound sync tailored for Instagram and YouTube.</p>
       </div>
 
       <div class="service-card">
         <div class="icon-box"><i class="fa-solid fa-video"></i></div>
         <h3>Vlog Editing</h3>
-        <p>Story-driven YouTube and travel vlog edits with smooth pacing, punchy zooms, music sync, and immersive vibes.</p>
+        <p>Story-driven travel and lifestyle vlogs with smooth pacing, music selection, and cinematic aesthetic.</p>
       </div>
 
       <div class="service-card">
         <div class="icon-box"><i class="fa-solid fa-camera"></i></div>
         <h3>Video Shooting</h3>
-        <p>Cinematic camera framing, professional angles, lighting execution, and on-location shooting direction.</p>
+        <p>Professional camera framing, lighting direction, cinematic angles, and on-location shooting execution.</p>
       </div>
 
       <div class="service-card">
         <div class="icon-box"><i class="fa-solid fa-image"></i></div>
         <h3>Thumbnail Designing</h3>
-        <p>High-CTR YouTube thumbnails with clean typography, facial expressions enhancement, and high visual contrast.</p>
+        <p>High-CTR clickable thumbnails with eye-catching contrast, sharp expressions, and punchy typography.</p>
       </div>
 
       <div class="service-card">
         <div class="icon-box"><i class="fa-solid fa-pen-nib"></i></div>
-        <h3>Logo Design</h3>
-        <p>Distinctive, modern, and memorable brand logos built to stand out on social media and digital platforms.</p>
+        <h3>Logo & Brand Design</h3>
+        <p>Distinctive, modern brand logos and cohesive social identity packages designed to stand out.</p>
       </div>
-
-      <div class="service-card">
-        <div class="icon-box"><i class="fa-solid fa-palette"></i></div>
-        <h3>Graphic Designing</h3>
-        <p>Creative social media posters, banners, promotional creatives, and complete digital branding packages.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Portfolio / Showcase Section -->
-  <section id="showcase">
-    <div class="section-title">
-      <h2>Featured Showcase</h2>
-      <p>Explore my recent video edits, commercials, and visual projects</p>
-    </div>
-
-    <div class="portfolio-box">
-      <h3>Official Video Showreel & Project Vault</h3>
-      <p>
-        Check out my full production archive containing high-resolution video reels, vlog cuts, and visual compositions directly on Google Drive.
-      </p>
-      <a href="https://drive.google.com/drive/folders/1TIZ8JH1WlOvZ72XT5VYZiLVInU5KB5Yi" target="_blank" class="drive-banner">
-        <i class="fa-brands fa-google-drive fa-lg"></i>
-        <span>Open ARCUS Video Portfolio (Google Drive)</span>
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-      </a>
     </div>
   </section>
 
@@ -443,7 +843,7 @@
   <section id="contact">
     <div class="section-title">
       <h2>Let's Work Together</h2>
-      <p>Have an upcoming project? Let’s bring your creative vision to reality.</p>
+      <p>Have an upcoming project? Let’s bring your vision to life.</p>
     </div>
 
     <div class="contact-wrapper">
@@ -451,6 +851,12 @@
         <i class="fa-solid fa-phone"></i>
         <h4>Call / Text</h4>
         <span>+91 8109780994</span>
+      </a>
+
+      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20am%20interested%20in%20your%20editing%20services" target="_blank" class="contact-card">
+        <i class="fa-brands fa-whatsapp"></i>
+        <h4>WhatsApp</h4>
+        <span>Instant Chat</span>
       </a>
 
       <a href="mailto:arcus0994@gmail.com" class="contact-card">
@@ -464,19 +870,33 @@
         <h4>Instagram</h4>
         <span>@arcu_sx</span>
       </a>
-
-      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20want%20to%20discuss%20a%20project" target="_blank" class="contact-card">
-        <i class="fa-brands fa-whatsapp"></i>
-        <h4>WhatsApp</h4>
-        <span>Instant Chat</span>
-      </a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer>
-    <p>&copy; 2026 ARCUS. All rights reserved. Crafted for visual excellence.</p>
+    <p>&copy; 2026 ARCUS. All rights reserved. Crafted for high-impact visual storytelling.</p>
   </footer>
+
+  <!-- Filter Script -->
+  <script>
+    function filterGallery(category) {
+      // Toggle Active Tab Button
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Filter Cards
+      const cards = document.querySelectorAll('.project-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
 
 </body>
 </html>
