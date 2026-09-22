@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCUS | Professional Video Editor & Visual Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #090b10;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.35);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .glow-orb {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navbar */
+    nav {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(12px);
+      background: rgba(9, 11, 16, 0.75);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 100;
+      padding: 1rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 2rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 7rem 5% 5rem;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge span {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+      letter-spacing: -1px;
+    }
+
+    .hero h1 span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2.2rem;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.85rem 1.8rem;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--gradient);
+      color: #fff;
+      box-shadow: 0 8px 25px var(--accent-glow);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Section Global */
+    section {
+      padding: 5rem 5%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-title h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Services Grid */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c084fc;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .service-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .service-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Portfolio Section */
+    .portfolio-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .portfolio-box h3 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .portfolio-box p {
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2rem;
+    }
+
+    .drive-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #1e1b4b;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      border: 1px solid #4338ca;
+      color: #e0e7ff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .drive-banner:hover {
+      transform: scale(1.03);
+      border-color: #6366f1;
+    }
+
+    /* Contact Section */
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .contact-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .contact-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .contact-card i {
+      font-size: 2rem;
+      color: #c084fc;
+      margin-bottom: 1rem;
+    }
+
+    .contact-card h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .contact-card span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 2rem 5%;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.3rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-orb"></div>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">ARCUS</div>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#showcase">Portfolio</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="badge">
+      <span></span> Available for New Projects
+    </div>
+    <h1>Turn Raw Footage Into <span>Cinematic Impact</span></h1>
+    <p>
+      I am <strong>ARCUS</strong>, a professional video editor and visual creator specializing in high-retention video editing, visual storytelling, dynamic vlogs, and scroll-stopping graphic designs.
+    </p>
+    <div class="cta-group">
+      <a href="#showcase" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch My Work</a>
+      <a href="https://wa.me/918109780994?text=Hi%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="btn btn-secondary"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Services Section -->
+  <section id="services">
+    <div class="section-title">
+      <h2>Creative Services</h2>
+      <p>High-quality visual production tailored to grow your audience and brand</p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-scissors"></i></div>
+        <h3>Video Editing</h3>
+        <p>Dynamic pacing, seamless sound design, color grading, and modern motion graphics built for audience retention.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-video"></i></div>
+        <h3>Vlog Editing</h3>
+        <p>Story-driven YouTube and travel vlog edits with smooth pacing, punchy zooms, music sync, and immersive vibes.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-camera"></i></div>
+        <h3>Video Shooting</h3>
+        <p>Cinematic camera framing, professional angles, lighting execution, and on-location shooting direction.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-image"></i></div>
+        <h3>Thumbnail Designing</h3>
+        <p>High-CTR YouTube thumbnails with clean typography, facial expressions enhancement, and high visual contrast.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-pen-nib"></i></div>
+        <h3>Logo Design</h3>
+        <p>Distinctive, modern, and memorable brand logos built to stand out on social media and digital platforms.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="icon-box"><i class="fa-solid fa-palette"></i></div>
+        <h3>Graphic Designing</h3>
+        <p>Creative social media posters, banners, promotional creatives, and complete digital branding packages.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio / Showcase Section -->
+  <section id="showcase">
+    <div class="section-title">
+      <h2>Featured Showcase</h2>
+      <p>Explore my recent video edits, commercials, and visual projects</p>
+    </div>
+
+    <div class="portfolio-box">
+      <h3>Official Video Showreel & Project Vault</h3>
+      <p>
+        Check out my full production archive containing high-resolution video reels, vlog cuts, and visual compositions directly on Google Drive.
+      </p>
+      <a href="https://drive.google.com/drive/folders/1TIZ8JH1WlOvZ72XT5VYZiLVInU5KB5Yi" target="_blank" class="drive-banner">
+        <i class="fa-brands fa-google-drive fa-lg"></i>
+        <span>Open ARCUS Video Portfolio (Google Drive)</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <div class="section-title">
+      <h2>Let's Work Together</h2>
+      <p>Have an upcoming project? Let’s bring your creative vision to reality.</p>
+    </div>
+
+    <div class="contact-wrapper">
+      <a href="tel:8109780994" class="contact-card">
+        <i class="fa-solid fa-phone"></i>
+        <h4>Call / Text</h4>
+        <span>+91 8109780994</span>
+      </a>
+
+      <a href="mailto:arcus0994@gmail.com" class="contact-card">
+        <i class="fa-solid fa-envelope"></i>
+        <h4>Email</h4>
+        <span>arcus0994@gmail.com</span>
+      </a>
+
+      <a href="https://instagram.com/arcu_sx" target="_blank" class="contact-card">
+        <i class="fa-brands fa-instagram"></i>
+        <h4>Instagram</h4>
+        <span>@arcu_sx</span>
+      </a>
+
+      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20want%20to%20discuss%20a%20project" target="_blank" class="contact-card">
+        <i class="fa-brands fa-whatsapp"></i>
+        <h4>WhatsApp</h4>
+        <span>Instant Chat</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 ARCUS. All rights reserved. Crafted for visual excellence.</p>
+  </footer>
+
+</body>
+</html>
