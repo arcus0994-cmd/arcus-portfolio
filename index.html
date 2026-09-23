@@ -1,1344 +1,906 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCUS // 3D Visual Direction & Cinematic Engineering (2026)</title>
+  <title>ARCUS // 3D Visual Direction &amp; Video Engineering 2026</title>
+  
+  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w200" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              obsidian: '#050608',
+              surface: '#0d0f14',
+              card: 'rgba(17, 20, 28, 0.75)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              crimson: '#ff1a2a',
+              fire: '#ef4444',
+              glow: 'rgba(255, 26, 42, 0.45)',
+              muted: '#8e96a4',
+              dim: '#4f5665'
+            }
+          },
+          fontFamily: {
+            syne: ['Syne', 'sans-serif'],
+            mono: ['Space Mono', 'monospace'],
+            sans: ['Space Grotesk', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
 
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Three.js (High-Performance WebGL 3D) & Vanilla Tilt -->
+  <!-- Three.js CDN for interactive 3D WebGL Background -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Vanilla-Tilt CDN for 3D physics card hover effects -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 
   <style>
-    :root {
-      --bg: #040507;
-      --card-bg: rgba(10, 12, 18, 0.82);
-      --card-border: rgba(255, 34, 34, 0.28);
-      --neon-red: #ff2222;
-      --neon-crimson: #d90429;
-      --neon-glow: 0 0 25px rgba(255, 34, 34, 0.6);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --font-display: 'Orbitron', sans-serif;
-      --font-hero: 'Syne', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050608; }
+    ::-webkit-scrollbar-thumb { background: #ff1a2a; border-radius: 3px; }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Custom 3D Glowing Cursor */
-    .custom-cursor {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background: var(--neon-red);
-      border-radius: 50%;
+    /* Custom Cursor Aura */
+    #cursor-dot {
       pointer-events: none;
-      z-index: 10000;
-      box-shadow: 0 0 15px var(--neon-red), 0 0 30px var(--neon-red);
-      transition: transform 0.08s ease-out;
-      transform: translate(-50%, -50%);
-    }
-
-    .cursor-follower {
       position: fixed;
-      width: 38px;
-      height: 38px;
-      border: 1.5px solid rgba(255, 34, 34, 0.65);
+      width: 8px;
+      height: 8px;
+      background: #ff1a2a;
       border-radius: 50%;
-      pointer-events: none;
       z-index: 9999;
-      transition: transform 0.18s ease-out;
       transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background 0.2s;
+      box-shadow: 0 0 12px #ff1a2a;
     }
-
-    /* 3D WebGL Canvas Layer */
-    #canvas3d {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+    #cursor-ring {
       pointer-events: none;
-      z-index: 0;
-      opacity: 0.85;
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 26, 42, 0.6);
+      border-radius: 50%;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
     }
 
-    /* Subtle Cinematic Scanlines */
-    body::before {
-      content: "";
+    /* 3D Glassmorphism & Depth */
+    .glass-card {
+      background: rgba(14, 17, 24, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 26, 42, 0.5);
+      box-shadow: 0 15px 40px -10px rgba(255, 26, 42, 0.35);
+    }
+
+    /* Holographic 3D Floating Animations */
+    @keyframes floatHolo {
+      0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+      50% { transform: translateY(-12px) rotateX(2deg) rotateY(-2deg); }
+    }
+    .animate-holo {
+      animation: floatHolo 6s ease-in-out infinite;
+    }
+
+    /* Scanline Overlay */
+    .scanlines::before {
+      content: " ";
+      display: block;
       position: fixed;
-      inset: 0;
-      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-      z-index: 998;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      z-index: 90;
       background-size: 100% 4px, 6px 100%;
       pointer-events: none;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
-    /* Top Director HUD Ribbon */
-    .hud-bar {
+    /* Kinetic Text Marquee */
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.6rem 6%;
-      background: rgba(4, 5, 7, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      position: relative;
-      z-index: 1001;
+      width: 200%;
+      animation: scrollMarquee 20s linear infinite;
     }
+    .marquee-track:hover { animation-play-state: paused; }
 
-    .rec-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--neon-red);
-      font-weight: 700;
-    }
-
-    .rec-dot {
-      width: 9px;
-      height: 9px;
-      background: var(--neon-red);
-      border-radius: 50%;
-      box-shadow: 0 0 12px var(--neon-red);
-      animation: pulse 1s infinite alternate;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.2; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1.15); }
-    }
-
-    /* Soundwave Visualizer Bars */
-    .visualizer-strip {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      height: 14px;
-    }
-
-    .v-bar {
-      width: 3px;
-      background: var(--neon-red);
-      border-radius: 2px;
-      animation: bounce 0.8s infinite ease-in-out alternate;
-    }
-    .v-bar:nth-child(1) { height: 40%; animation-delay: 0.1s; }
-    .v-bar:nth-child(2) { height: 90%; animation-delay: 0.3s; }
-    .v-bar:nth-child(3) { height: 60%; animation-delay: 0.2s; }
-    .v-bar:nth-child(4) { height: 100%; animation-delay: 0.4s; }
-    .v-bar:nth-child(5) { height: 50%; animation-delay: 0.25s; }
-
-    @keyframes bounce {
-      0% { transform: scaleY(0.3); }
-      100% { transform: scaleY(1); }
-    }
-
-    /* Navigation */
-    nav {
-      position: sticky;
-      top: 0;
-      backdrop-filter: blur(20px);
-      background: rgba(4, 5, 7, 0.88);
-      border-bottom: 1px solid var(--card-border);
-      z-index: 1000;
-      padding: 1.1rem 6%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .nav-avatar {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--neon-red);
-      box-shadow: 0 0 16px rgba(255, 34, 34, 0.6);
-      transition: transform 0.4s ease;
-    }
-
-    .nav-avatar:hover {
-      transform: rotate(15deg) scale(1.1);
-    }
-
-    .logo-brand {
-      font-family: var(--font-display);
-      font-weight: 900;
-      font-size: 1.85rem;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, #ffffff 0%, #ff2222 65%, #d90429 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 15px rgba(255, 34, 34, 0.4));
-    }
-
-    .logo-brand sub {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 2px;
-      color: var(--neon-red);
-      -webkit-text-fill-color: var(--neon-red);
-      margin-left: 5px;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-left: 2rem;
-      font-size: 0.85rem;
-      font-family: var(--font-mono);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      transition: all 0.3s;
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: "";
+    /* Aspect Ratio Containers */
+    .ratio-16-9 { position: relative; width: 100%; padding-top: 56.25%; }
+    .ratio-9-16 { position: relative; width: 100%; padding-top: 155%; }
+    .embed-box iframe {
       position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0%;
-      height: 2px;
-      background: var(--neon-red);
-      box-shadow: 0 0 8px var(--neon-red);
-      transition: width 0.3s;
-    }
-
-    .nav-links a:hover {
-      color: #fff;
-    }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-
-    /* Hero Section */
-    .hero {
-      position: relative;
-      padding: 6.5rem 6% 4.5rem;
-      text-align: center;
-      max-width: 1100px;
-      margin: 0 auto;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .hero-avatar-3d-box {
-      position: relative;
-      width: 170px;
-      height: 170px;
-      margin-bottom: 2.2rem;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    .hero-avatar-ring {
-      position: absolute;
-      inset: -12px;
-      border: 2px dashed rgba(255, 34, 34, 0.6);
-      border-radius: 50%;
-      animation: spinRing 16s linear infinite;
-    }
-
-    @keyframes spinRing {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .hero-avatar {
+      inset: 0;
       width: 100%;
       height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--neon-red);
-      box-shadow: 0 0 45px rgba(255, 34, 34, 0.7);
-      display: block;
-      filter: contrast(1.1);
-    }
-
-    .hud-corner {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--neon-red);
-      pointer-events: none;
-    }
-    .hud-corner-tl { top: -12px; left: -12px; border-right: none; border-bottom: none; }
-    .hud-corner-br { bottom: -12px; right: -12px; border-left: none; border-top: none; }
-
-    .hero-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 24px;
-      border-radius: 50px;
-      background: rgba(255, 34, 34, 0.08);
-      border: 1px solid var(--card-border);
-      color: #ff9999;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 1.8rem;
-      box-shadow: 0 0 20px rgba(255, 34, 34, 0.2);
-    }
-
-    .hero h1 {
-      font-family: var(--font-hero);
-      font-size: clamp(3rem, 7.5vw, 5.8rem);
-      font-weight: 900;
-      line-height: 0.95;
-      letter-spacing: -1.5px;
-      margin-bottom: 1.6rem;
-      text-transform: uppercase;
-    }
-
-    .hero h1 .text-glow {
-      background: linear-gradient(135deg, #ffffff 10%, #ff2222 65%, #d90429 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 35px rgba(255, 34, 34, 0.7));
-    }
-
-    .hero p {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      margin-bottom: 2.8rem;
-      max-width: 800px;
-      line-height: 1.8;
-      font-weight: 300;
-    }
-
-    .cta-group {
-      display: flex;
-      gap: 1.4rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 1.05rem 2.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.35s ease;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-neon {
-      background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
-      color: #fff;
-      box-shadow: 0 0 30px rgba(255, 34, 34, 0.6);
-      border: 1px solid var(--neon-red);
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    }
-
-    .btn-neon:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 0 50px rgba(255, 34, 34, 0.9);
-    }
-
-    .btn-outline {
-      background: rgba(10, 12, 18, 0.85);
-      color: #fff;
-      border: 1px solid var(--card-border);
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    }
-
-    .btn-outline:hover {
-      border-color: #fff;
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
-      transform: translateY(-3px);
-    }
-
-    /* 3D Floating Metric Stats */
-    .metric-grid {
-      margin-top: 4.5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.4rem;
-      width: 100%;
-      max-width: 1050px;
-    }
-
-    .metric-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 1.8rem 1.4rem;
-      text-align: center;
-      border-radius: 8px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-      transform-style: preserve-3d;
-      will-change: transform;
-      transition: border-color 0.3s;
-    }
-
-    .metric-card:hover {
-      border-color: var(--neon-red);
-    }
-
-    .metric-value {
-      font-family: var(--font-hero);
-      font-size: 3.2rem;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1;
-      text-shadow: 0 0 20px rgba(255, 34, 34, 0.5);
-      transform: translateZ(25px);
-    }
-
-    .metric-title {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-top: 8px;
-      transform: translateZ(15px);
-    }
-
-    /* Global Section Framing */
-    section {
-      padding: 5.5rem 6%;
-      max-width: 1320px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .section-title-wrap {
-      text-align: center;
-      margin-bottom: 3.5rem;
-    }
-
-    .section-title-wrap h2 {
-      font-family: var(--font-hero);
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
-      font-weight: 900;
-      letter-spacing: -1px;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .section-title-wrap p {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--neon-red);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    /* Software Arsenal with 3D Depth */
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 1.6rem;
-    }
-
-    .app-tile {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 2.2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-      transform-style: preserve-3d;
-      will-change: transform;
-      transition: border-color 0.3s;
-    }
-
-    .app-tile:hover {
-      border-color: var(--neon-red);
-    }
-
-    .app-header-box {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.4rem;
-      transform: translateZ(25px);
-    }
-
-    .app-logo-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 900;
-      font-size: 1.35rem;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-    }
-
-    .badge-pr { background: #00005b; color: #9999ff; border: 1.5px solid #9999ff; }
-    .badge-ae { background: #00005b; color: #d291ff; border: 1.5px solid #d291ff; }
-    .badge-dv { background: #181922; color: #ff5555; border: 1.5px solid #ff5555; }
-    .badge-ps { background: #001e36; color: #31a8ff; border: 1.5px solid #31a8ff; }
-    .badge-ai { background: #330000; color: #ff9a00; border: 1.5px solid #ff9a00; }
-    .badge-figma { background: #16171d; color: #0acf83; border: 1.5px solid #0acf83; }
-
-    .app-tag {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      border: 1px solid var(--card-border);
-      padding: 5px 10px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border-radius: 4px;
-    }
-
-    .app-name {
-      font-family: var(--font-hero);
-      font-size: 1.35rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
-      color: #fff;
-      transform: translateZ(20px);
-    }
-
-    .app-desc {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.7;
-      transform: translateZ(10px);
-    }
-
-    /* Client Reviews 3D Cards */
-    .reviews-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.8rem;
-    }
-
-    .review-3d-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 2.4rem 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-      transform-style: preserve-3d;
-      will-change: transform;
-      transition: border-color 0.3s;
-    }
-
-    .review-3d-card:hover {
-      border-color: var(--neon-red);
-      box-shadow: 0 0 35px rgba(255, 34, 34, 0.25);
-    }
-
-    .stars-strip {
-      color: #f59e0b;
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      display: flex;
-      gap: 5px;
-      transform: translateZ(20px);
-    }
-
-    .review-text {
-      font-size: 0.96rem;
-      color: #cbd5e1;
-      line-height: 1.8;
-      margin-bottom: 1.8rem;
-      font-style: italic;
-      transform: translateZ(15px);
-    }
-
-    .reviewer-meta {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      border-top: 1px solid var(--card-border);
-      padding-top: 1.4rem;
-      transform: translateZ(20px);
-    }
-
-    .reviewer-pfp {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255, 34, 34, 0.15);
-      border: 1.5px solid var(--neon-red);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 800;
-      color: var(--neon-red);
-      box-shadow: 0 0 12px rgba(255, 34, 34, 0.4);
-    }
-
-    .reviewer-name {
-      font-family: var(--font-hero);
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .reviewer-role {
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    /* Filter Tabs & Gallery */
-    .filter-wrap {
-      display: flex;
-      justify-content: center;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-      margin-bottom: 3.5rem;
-    }
-
-    .filter-btn {
-      padding: 0.75rem 1.6rem;
-      background: rgba(15, 18, 28, 0.8);
-      border: 1px solid var(--card-border);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-    }
-
-    .filter-btn.active, .filter-btn:hover {
-      background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
-      color: #fff;
-      border-color: transparent;
-      box-shadow: 0 0 30px rgba(255, 34, 34, 0.65);
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 2rem;
-    }
-
-    .project-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: all 0.35s ease;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    .project-card:hover {
-      border-color: var(--neon-red);
-      box-shadow: 0 0 40px rgba(255, 34, 34, 0.4);
-      transform: translateY(-6px);
-    }
-
-    .media-window {
-      position: relative;
-      width: 100%;
-      background: #000;
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .ratio-16-9 { padding-top: 56.25%; }
-    .ratio-9-16 { padding-top: 135%; }
-
-    .media-window iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      border: none;
-    }
-
-    .card-content {
-      padding: 1.6rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex-grow: 1;
-      transform: translateZ(20px);
-    }
-
-    .tag-category {
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--neon-red);
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .card-title {
-      font-family: var(--font-hero);
-      font-size: 1.3rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.6rem;
-      color: #fff;
-    }
-
-    .card-desc {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-bottom: 1.4rem;
-      line-height: 1.7;
-    }
-
-    .btn-stream {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 0.75rem 1.3rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      color: #fff;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
-    .btn-stream:hover {
-      background: var(--neon-red);
-      border-color: var(--neon-red);
-      box-shadow: 0 0 20px var(--neon-red);
-    }
-
-    /* Contact Section */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.6rem;
-    }
-
-    .contact-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 2.4rem 1.6rem;
-      text-align: center;
-      text-decoration: none;
-      color: var(--text);
-      border-radius: 10px;
-      transition: all 0.3s;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    .contact-card:hover {
-      border-color: var(--neon-red);
-      box-shadow: 0 0 35px rgba(255, 34, 34, 0.5);
-      transform: translateY(-5px);
-    }
-
-    .contact-card i {
-      font-size: 2.4rem;
-      color: var(--neon-red);
-      filter: drop-shadow(0 0 15px var(--neon-red));
-      margin-bottom: 1rem;
-      transform: translateZ(25px);
-    }
-
-    .contact-card h4 {
-      font-family: var(--font-hero);
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-bottom: 0.4rem;
-      transform: translateZ(20px);
-    }
-
-    .contact-card span {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      transform: translateZ(15px);
-    }
-
-    footer {
-      border-top: 1px solid var(--card-border);
-      padding: 2.8rem 6%;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      letter-spacing: 1.5px;
-      position: relative;
-      z-index: 1;
-    }
-
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2.6rem; }
-      .nav-links { display: none; }
-      .gallery-grid { grid-template-columns: 1fr; }
-      .custom-cursor, .cursor-follower { display: none; }
+      border: 0;
     }
   </style>
 </head>
-<body>
+<body class="bg-brand-obsidian text-white font-sans selection:bg-brand-crimson selection:text-white antialiased overflow-x-hidden scanlines">
 
-  <!-- Custom Neon Cyber Cursor -->
-  <div class="custom-cursor" id="cursor"></div>
-  <div class="cursor-follower" id="follower"></div>
+  <!-- Custom Cursor Follower -->
+  <div id="cursor-dot" class="hidden md:block"></div>
+  <div id="cursor-ring" class="hidden md:block"></div>
 
-  <!-- 3D WebGL Three.js Particle & Floating Geometry Canvas -->
-  <canvas id="canvas3d"></canvas>
+  <!-- Three.js 3D WebGL Canvas Layer -->
+  <canvas id="webgl-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-45"></canvas>
 
-  <!-- Top Director HUD Ribbon -->
-  <div class="hud-bar">
-    <div class="rec-indicator">
-      <div class="rec-dot"></div> [REC] 4K PRO-RES 60FPS
+  <!-- Top Broadcast & Live Director Status HUD -->
+  <aside class="relative z-50 w-full border-b border-white/5 bg-brand-obsidian/90 backdrop-blur-xl px-4 sm:px-12 py-2 flex justify-between items-center text-[11px] font-mono tracking-wider text-brand-muted">
+    <div class="flex items-center gap-3">
+      <span class="flex h-2.5 w-2.5 relative">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-crimson opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-crimson"></span>
+      </span>
+      <span class="text-white font-bold tracking-widest uppercase">ARCUS // 3D EDITORIAL CORE [2026]</span>
     </div>
-    <div class="visualizer-strip">
-      <div class="v-bar"></div>
-      <div class="v-bar"></div>
-      <div class="v-bar"></div>
-      <div class="v-bar"></div>
-      <div class="v-bar"></div>
-    </div>
-    <div id="timecode">TC 00:02:14:28</div>
-    <div>EXP: 2+ YEARS // 100+ CURATED DELIVERIES</div>
-  </div>
-
-  <!-- Navbar -->
-  <nav>
-    <div class="brand-wrap">
-      <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w300" 
-           onerror="this.src='./profile.png';" 
-           alt="ARCUS" class="nav-avatar">
-      <div class="logo-brand">ARCUS<sub>STUDIO</sub></div>
-    </div>
-    <div class="nav-links">
-      <a href="#productions">// PRODUCTION VAULT</a>
-      <a href="#arsenal">// 3D ARSENAL</a>
-      <a href="#reviews">// TESTIMONIALS</a>
-      <a href="#contact">// INITIATE CHAT</a>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <header class="hero">
-    <div class="hero-avatar-3d-box" data-tilt data-tilt-max="20" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
-      <div class="hud-corner hud-corner-tl"></div>
-      <div class="hero-avatar-ring"></div>
-      <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w1000" 
-           onerror="this.src='./profile.png';" 
-           alt="ARCUS Creator" class="hero-avatar">
-      <div class="hud-corner hud-corner-br"></div>
-    </div>
-
-    <div class="hero-pill">
-      <i class="fa-solid fa-bolt"></i> 2+ YEARS PRODUCTION MASTERY
-    </div>
-    <h1>
-      CRAFTING <br><span class="text-glow">CINEMATIC REALITY</span>
-    </h1>
-    <p>
-      Brand identity &amp; high-retention video engineering. Specializing in viral 9:16 social reels, commercial storytelling trailers, surgical pacing, and custom visual graphics tailored to dominate modern digital attention.
-    </p>
-
-    <div class="cta-group">
-      <a href="#productions" class="btn btn-neon"><i class="fa-solid fa-play"></i> EXPLORE VAULT</a>
-      <a href="https://wa.me/918109780994?text=Hey%20ARCUS,%20let's%20collaborate%20on%20a%20project!" target="_blank" class="btn btn-outline"><i class="fa-brands fa-whatsapp"></i> INITIATE CHAT</a>
-    </div>
-
-    <!-- 3D Metric Badges -->
-    <div class="metric-grid">
-      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
-        <div class="metric-value">02+</div>
-        <div class="metric-title">Years of Editing Mastery</div>
+    <div class="flex items-center gap-6">
+      <span class="hidden sm:inline text-brand-dim">RAIPUR, INDIA &bull; REMOTE GLOBAL</span>
+      <div class="border border-brand-crimson/40 bg-brand-crimson/10 px-2.5 py-0.5 rounded text-white font-medium text-[10px] flex items-center gap-1.5">
+        <i class="fa-solid fa-crosshairs text-brand-crimson"></i> COMMISSIONS OPEN
       </div>
-      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
-        <div class="metric-value">100+</div>
-        <div class="metric-title">Curated Assets Delivered</div>
+    </div>
+  </aside>
+
+  <!-- Main Navigation -->
+  <header class="sticky top-0 z-40 w-full border-b border-white/10 bg-brand-obsidian/75 backdrop-blur-2xl px-4 sm:px-12 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-11 h-11 rounded-full p-[2px] border-2 border-brand-crimson bg-black shadow-[0_0_20px_rgba(255,26,42,0.6)]">
+        <img 
+          src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w200" 
+          alt="ARCUS Brand" 
+          class="w-full h-full object-cover rounded-full"
+          onerror="this.onerror=null; this.src='./profile.png';"
+        />
       </div>
-      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
-        <div class="metric-value">100%</div>
-        <div class="metric-title">Custom Sound &amp; Grade</div>
+      <div>
+        <a href="#" class="font-syne text-2xl font-black tracking-tight text-white flex items-center gap-1 group">
+          ARCUS<span class="text-brand-crimson group-hover:scale-125 transition-transform">.</span>
+        </a>
+        <p class="text-[10px] font-mono text-brand-muted tracking-widest uppercase">Video Editor &amp; Director</p>
       </div>
-      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
-        <div class="metric-value">24H</div>
-        <div class="metric-title">Rapid Production Turnaround</div>
-      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-brand-muted">
+      <a href="#about" class="hover:text-white transition-colors flex items-center gap-1.5"><span class="text-brand-crimson">01.</span> Bio</a>
+      <a href="#arsenal" class="hover:text-white transition-colors flex items-center gap-1.5"><span class="text-brand-crimson">02.</span> Software Stack</a>
+      <a href="#vault" class="hover:text-white transition-colors flex items-center gap-1.5"><span class="text-brand-crimson">03.</span> 3D Vault</a>
+      <a href="#contact" class="hover:text-white transition-colors flex items-center gap-1.5"><span class="text-brand-crimson">04.</span> Connect</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="https://wa.me/918109780994?text=Hey%20ARCUS,%20I%20want%20to%20collaborate%20on%20a%20project!" 
+         target="_blank" 
+         class="inline-flex items-center gap-2 bg-brand-crimson hover:bg-brand-fire text-white text-xs font-mono font-bold tracking-wider px-4 py-2.5 rounded shadow-[0_0_20px_rgba(255,26,42,0.4)] transition-all">
+        <i class="fa-brands fa-whatsapp text-sm"></i>
+        <span>DIRECT LINE</span>
+      </a>
     </div>
   </header>
 
-  <!-- Software Arsenal (Apps & Badges) -->
-  <section id="arsenal">
-    <div class="section-title-wrap">
-      <h2>// SOFTWARE ARSENAL</h2>
-      <p>&lt; PRODUCTION ENGINE &amp; DESIGN STACK &gt;</p>
-    </div>
+  <!-- 3D HERO SECTION -->
+  <section class="relative z-10 pt-14 pb-20 sm:pt-24 sm:pb-32 px-4 sm:px-12 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <!-- Left Content Column -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-brand-crimson/50 bg-brand-crimson/10 font-mono text-xs text-white">
+          <span class="w-2 h-2 rounded-full bg-brand-crimson animate-ping"></span>
+          <span class="font-bold tracking-widest uppercase">2+ YEARS OF PRODUCTION MASTERY</span>
+        </div>
 
-    <div class="apps-grid">
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-pr">Pr</div>
-          <div class="app-tag">TIMELINE ENGINE</div>
-        </div>
-        <div>
-          <div class="app-name">Adobe Premiere Pro</div>
-          <div class="app-desc">Rhythm, dialogue frequency leveling, multi-cam assembly, and surgical narrative cuts.</div>
-        </div>
-      </div>
+        <h1 class="font-syne text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight leading-[0.95]">
+          SURGICAL CUTS. <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-brand-muted to-brand-crimson">
+            HOLOGRAPHIC
+          </span><br/>
+          RETENTION.
+        </h1>
 
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-ae">Ae</div>
-          <div class="app-tag">MOTION SUITE</div>
-        </div>
-        <div>
-          <div class="app-name">Adobe After Effects</div>
-          <div class="app-desc">Kinetic typography, screen motion tracking, visual transitions, SFX, and VFX synthesis.</div>
-        </div>
-      </div>
+        <p class="font-sans text-brand-muted text-base sm:text-lg max-w-xl font-normal leading-relaxed">
+          I am <strong class="text-white">ARCUS</strong> — crafting cinematic reality across high-retention vertical reels, high-ticket product advertisements, and master corporate documentaries. Built for maximum viewer engagement.
+        </p>
 
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-dv">Dv</div>
-          <div class="app-tag">COLOR SUITE</div>
-        </div>
-        <div>
-          <div class="app-name">DaVinci Resolve</div>
-          <div class="app-desc">Node-based film emulation, precise skin-tone grading, and master HDR exports.</div>
-        </div>
-      </div>
-
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-ps">Ps</div>
-          <div class="app-tag">VISUAL DESIGN</div>
-        </div>
-        <div>
-          <div class="app-name">Adobe Photoshop</div>
-          <div class="app-desc">High-CTR clickable thumbnails, depth extraction, poster design, and digital textures.</div>
-        </div>
-      </div>
-
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-ai">Ai</div>
-          <div class="app-tag">VECTOR SUITE</div>
-        </div>
-        <div>
-          <div class="app-name">Adobe Illustrator</div>
-          <div class="app-desc">Vector brand marks, geometric logos, custom typography, and editorial layouts.</div>
-        </div>
-      </div>
-
-      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
-        <div class="app-header-box">
-          <div class="app-logo-badge badge-figma">Fg</div>
-          <div class="app-tag">UI &amp; AI STACK</div>
-        </div>
-        <div>
-          <div class="app-name">Figma &amp; AI Neural</div>
-          <div class="app-desc">Product mockups, neural audio noise isolation, frame expansions, and storyboard grids.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Client Reviews 3D Section -->
-  <section id="reviews">
-    <div class="section-title-wrap">
-      <h2>// CLIENT APPRAISALS</h2>
-      <p>&lt; 100+ DELIVERIES WITH 100% SATISFACTION &gt;</p>
-    </div>
-
-    <div class="reviews-container">
-      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div>
-          <div class="stars-strip">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        <!-- Metrics Strip with 3D Tilt -->
+        <div class="grid grid-cols-3 gap-4 pt-4 font-mono">
+          <div class="glass-card p-4 rounded-xl border border-white/10" data-tilt data-tilt-max="12" data-tilt-speed="400">
+            <div class="text-3xl font-black text-white font-syne">2+ <span class="text-brand-crimson text-sm font-mono">YRS</span></div>
+            <div class="text-[10px] text-brand-muted uppercase tracking-wider mt-1">Active Experience</div>
           </div>
-          <p class="review-text">
-            "ARCUS completely leveled up our product trailer! The motion tracking and surgical cut pacing kept viewers hooked from start to finish. Easily one of the sharpest editors in the game."
-          </p>
+          <div class="glass-card p-4 rounded-xl border border-white/10" data-tilt data-tilt-max="12" data-tilt-speed="400">
+            <div class="text-3xl font-black text-white font-syne">15+</div>
+            <div class="text-[10px] text-brand-muted uppercase tracking-wider mt-1">Curated Assets</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-white/10" data-tilt data-tilt-max="12" data-tilt-speed="400">
+            <div class="text-3xl font-black text-brand-crimson font-syne">4K</div>
+            <div class="text-[10px] text-brand-muted uppercase tracking-wider mt-1">UHD Color Master</div>
+          </div>
         </div>
-        <div class="reviewer-meta">
-          <div class="reviewer-pfp">AS</div>
-          <div>
-            <div class="reviewer-name">Aman Sharma</div>
-            <div class="reviewer-role">Founder, Tech App Studio</div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center gap-4 pt-4">
+          <a href="#vault" class="bg-brand-crimson hover:bg-brand-fire text-white text-xs font-mono font-bold uppercase tracking-widest px-8 py-4 rounded shadow-[0_0_30px_rgba(255,26,42,0.55)] transition-all flex items-center gap-3">
+            <span>EXPLORE 3D VAULT</span>
+            <i class="fa-solid fa-arrow-down-long"></i>
+          </a>
+          <a href="https://instagram.com/arcu_sx" target="_blank" class="border border-white/20 hover:border-white bg-white/5 text-white text-xs font-mono font-bold uppercase tracking-widest px-6 py-4 rounded transition-all flex items-center gap-2">
+            <i class="fa-brands fa-instagram text-brand-crimson"></i>
+            <span>@arcu_sx</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right 3D Holographic Card Portrait with Camera HUD -->
+      <div class="lg:col-span-5 flex justify-center">
+        <div class="relative w-full max-w-[360px] aspect-[4/5] rounded-2xl glass-card p-3 animate-holo" data-tilt data-tilt-max="18" data-tilt-glare data-tilt-max-glare="0.5">
+          
+          <!-- Holographic HUD brackets -->
+          <div class="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-brand-crimson z-20 pointer-events-none"></div>
+          <div class="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-brand-crimson z-20 pointer-events-none"></div>
+          <div class="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-brand-crimson z-20 pointer-events-none"></div>
+          <div class="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-brand-crimson z-20 pointer-events-none"></div>
+
+          <!-- Direct Drive Avatar with local fallback -->
+          <div class="w-full h-full rounded-xl overflow-hidden relative border border-brand-crimson/40">
+            <img 
+              id="hero-img"
+              src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w1000" 
+              alt="ARCUS Silhouette Portrait" 
+              class="w-full h-full object-cover filter contrast-125 brightness-95"
+              onerror="this.onerror=null; this.src='./profile.png';"
+            />
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 pointer-events-none"></div>
+
+            <div class="absolute top-4 left-4 bg-black/80 backdrop-blur-md border border-white/20 px-2.5 py-1 rounded text-[10px] font-mono text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-brand-crimson animate-ping"></span>
+              4K RAW &bull; PRO-RES 60FPS
+            </div>
+
+            <!-- Floating 3D Experience Stamp -->
+            <div class="absolute bottom-4 inset-x-4 bg-brand-obsidian/90 backdrop-blur-md border border-brand-crimson/50 p-3 rounded-lg text-center shadow-[0_0_20px_rgba(255,26,42,0.3)]">
+              <div class="text-white font-syne font-bold text-base tracking-wider uppercase">DIR. ARCUS</div>
+              <div class="text-brand-crimson text-[10px] font-mono tracking-widest uppercase">2+ YEARS OF PRODUCTION</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div>
-          <div class="stars-strip">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="review-text">
-            "The retention on our Instagram Reels jumped significantly after ARCUS took over the editing. His beat-syncing and kinetic typography are on another level."
-          </p>
-        </div>
-        <div class="reviewer-meta">
-          <div class="reviewer-pfp">RK</div>
-          <div>
-            <div class="reviewer-name">Rohan Kapoor</div>
-            <div class="reviewer-role">Digital Content Creator</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div>
-          <div class="stars-strip">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="review-text">
-            "Our healthcare documentary and luxury hotel commercial looked pristine. The subtle color grading and professional audio score gave our brand a world-class international feel."
-          </p>
-        </div>
-        <div class="reviewer-meta">
-          <div class="reviewer-pfp">VN</div>
-          <div>
-            <div class="reviewer-name">Vikram Nair</div>
-            <div class="reviewer-role">Hospitality Marketing Lead</div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
-  <!-- Production Vault (15 Assets) -->
-  <section id="productions">
-    <div class="section-title-wrap">
-      <h2>// PRODUCTION VAULT</h2>
-      <p>&lt; 100+ CURATED DELIVERIES // EXPLORE FLAGSHIP WORKS &gt;</p>
+  <!-- Kinetic Marquee -->
+  <div class="w-full bg-brand-surface border-y border-white/10 overflow-hidden py-3 font-mono text-xs uppercase tracking-widest text-brand-muted relative z-10">
+    <div class="marquee-track flex items-center gap-8 whitespace-nowrap">
+      <span class="flex items-center gap-2 text-white"><i class="fa-solid fa-bolt text-brand-crimson"></i> 2+ YEARS PRODUCTION MASTERY</span>
+      <span>//</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-film text-brand-crimson"></i> ADOBE PREMIERE PRO &bull; AFTER EFFECTS &bull; DAVINCI RESOLVE</span>
+      <span>//</span>
+      <span class="flex items-center gap-2 text-white"><i class="fa-brands fa-instagram text-brand-crimson"></i> VIRAL RETENTION REELS &bull; COMMERCIAL ADS</span>
+      <span>//</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-hospital text-brand-crimson"></i> HEALTHCARE DOCUMENTARIES &bull; LUXURY HOSPITALITY</span>
+      <span>//</span>
+      <span class="flex items-center gap-2 text-white"><i class="fa-solid fa-palette text-brand-crimson"></i> HIGH-CTR THUMBNAILS &bull; GRAPHIC SYSTEMS</span>
+      <span>//</span>
+      <!-- Duplicate -->
+      <span class="flex items-center gap-2 text-white"><i class="fa-solid fa-bolt text-brand-crimson"></i> 2+ YEARS PRODUCTION MASTERY</span>
+      <span>//</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-film text-brand-crimson"></i> ADOBE PREMIERE PRO &bull; AFTER EFFECTS &bull; DAVINCI RESOLVE</span>
+    </div>
+  </div>
+
+  <!-- SECTION: SOFTWARE ARSENAL (Requested App Logos & Tech Stack) -->
+  <section id="arsenal" class="py-24 px-4 sm:px-12 max-w-7xl mx-auto relative z-10 border-b border-white/10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+      <div>
+        <div class="font-mono text-xs uppercase tracking-widest text-brand-crimson flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-microchip"></i>
+          <span>[ SOFTWARE ARSENAL // TOOL SUITE ]</span>
+        </div>
+        <h2 class="font-syne text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
+          TOOLS OF CREATIVE POWER.
+        </h2>
+      </div>
+      <p class="font-mono text-xs text-brand-muted max-w-md">
+        Calibrated over 2+ years for surgical timeline pacing, node-based film color science, and dynamic visual effects.
+      </p>
     </div>
 
-    <!-- Interactive Filter Tabs -->
-    <div class="filter-wrap">
-      <button class="filter-btn active" onclick="applyFilter('all')">ALL (15)</button>
-      <button class="filter-btn" onclick="applyFilter('reels')">INSTAGRAM REELS</button>
-      <button class="filter-btn" onclick="applyFilter('talking-head')">TALKING HEAD</button>
-      <button class="filter-btn" onclick="applyFilter('commercial')">COMMERCIAL &amp; APP</button>
-      <button class="filter-btn" onclick="applyFilter('hospital-hotel')">HOSPITAL &amp; HOTEL</button>
-      <button class="filter-btn" onclick="applyFilter('graphics')">GRAPHIC DESIGNS</button>
+    <!-- Official Apps Grid with High-Res Brand Badges -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <!-- 1. Adobe Premiere Pro -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#00005b] border border-[#9999ff]/50 flex items-center justify-center text-[#9999ff] font-syne text-2xl font-black shadow-[0_0_20px_rgba(153,153,255,0.3)] group-hover:scale-110 transition-transform">
+            Pr
+          </div>
+          <span class="text-[10px] font-mono text-brand-crimson font-bold bg-brand-crimson/10 border border-brand-crimson/30 px-2 py-0.5 rounded">PRIMARY NLE</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">Adobe Premiere Pro</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Timeline Sequencing &bull; Multi-Cam &bull; Dialogue Master</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-[#9999ff] h-full w-[96%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>2+ Years Daily Mastery</span>
+          <span class="text-white font-bold">96%</span>
+        </div>
+      </div>
+
+      <!-- 2. Adobe After Effects -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#00005b] border border-[#d291ff]/50 flex items-center justify-center text-[#d291ff] font-syne text-2xl font-black shadow-[0_0_20px_rgba(210,145,255,0.3)] group-hover:scale-110 transition-transform">
+            Ae
+          </div>
+          <span class="text-[10px] font-mono text-purple-400 font-bold bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 rounded">VFX &bull; MOTION</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">Adobe After Effects</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Kinetic Text &bull; Camera Tracking &bull; Seamless VFX</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-purple-500 to-[#d291ff] h-full w-[92%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Visual FX &amp; Motion</span>
+          <span class="text-white font-bold">92%</span>
+        </div>
+      </div>
+
+      <!-- 3. DaVinci Resolve -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#17141f] border border-orange-500/50 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.3)] group-hover:scale-110 transition-transform">
+            <!-- Official DaVinci colored pinwheel SVG icon -->
+            <svg class="w-8 h-8" viewBox="0 0 100 100">
+              <path d="M50 50 L20 15 A45 45 0 0 1 50 5 Z" fill="#ff4d4d"/>
+              <path d="M50 50 L80 15 A45 45 0 0 1 95 50 Z" fill="#ffcc00"/>
+              <path d="M50 50 L85 80 A45 45 0 0 1 50 95 Z" fill="#33cc33"/>
+              <path d="M50 50 L20 85 A45 45 0 0 1 5 50 Z" fill="#3399ff"/>
+            </svg>
+          </div>
+          <span class="text-[10px] font-mono text-orange-400 font-bold bg-orange-500/10 border border-orange-500/30 px-2 py-0.5 rounded">COLOR SCIENCE</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">DaVinci Resolve</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Node Grading &bull; Film LUTs &bull; Fairlight Audio</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-yellow-500 to-orange-500 h-full w-[90%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Color Calibration</span>
+          <span class="text-white font-bold">90%</span>
+        </div>
+      </div>
+
+      <!-- 4. Adobe Photoshop -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#001e36] border border-[#31a8ff]/50 flex items-center justify-center text-[#31a8ff] font-syne text-2xl font-black shadow-[0_0_20px_rgba(49,168,255,0.3)] group-hover:scale-110 transition-transform">
+            Ps
+          </div>
+          <span class="text-[10px] font-mono text-[#31a8ff] font-bold bg-[#31a8ff]/10 border border-[#31a8ff]/30 px-2 py-0.5 rounded">THUMBNAIL LAB</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">Adobe Photoshop</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">High-CTR Art &bull; Depth Masks &bull; Graphic Posters</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-cyan-500 to-[#31a8ff] h-full w-[95%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Graphic Compositing</span>
+          <span class="text-white font-bold">95%</span>
+        </div>
+      </div>
+
+      <!-- 5. Adobe Illustrator -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#330000] border border-[#ff9a00]/50 flex items-center justify-center text-[#ff9a00] font-syne text-2xl font-black shadow-[0_0_20px_rgba(255,154,0,0.3)] group-hover:scale-110 transition-transform">
+            Ai
+          </div>
+          <span class="text-[10px] font-mono text-[#ff9a00] font-bold bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">VECTOR SUITE</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">Adobe Illustrator</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Brand Architecture &bull; Logos &bull; Vector Typography</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-yellow-500 to-amber-500 h-full w-[88%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Identity Engineering</span>
+          <span class="text-white font-bold">88%</span>
+        </div>
+      </div>
+
+      <!-- 6. Figma -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-[#1b1c23] border border-pink-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(244,63,94,0.3)] group-hover:scale-110 transition-transform">
+            <!-- Figma Official colorful Logo SVG -->
+            <svg class="w-8 h-8" viewBox="0 0 38 57" fill="none">
+              <path d="M19 28.5C19 23.2533 23.2533 19 28.5 19C33.7467 19 38 23.2533 38 28.5C38 33.7467 33.7467 38 28.5 38C23.2533 38 19 33.7467 19 28.5Z" fill="#1ABCFE"/>
+              <path d="M0 47.5C0 42.2533 4.25329 38 9.5 38H19V47.5C19 52.7467 14.7467 57 9.5 57C4.25329 57 0 52.7467 0 47.5Z" fill="#0ACF83"/>
+              <path d="M19 0V19H28.5C33.7467 19 38 14.7467 38 9.5C38 4.25329 33.7467 0 28.5 0H19Z" fill="#FF7262"/>
+              <path d="M0 9.5C0 14.7467 4.25329 19 9.5 19H19V0H9.5C4.25329 0 0 4.25329 0 9.5Z" fill="#F24E1E"/>
+              <path d="M0 28.5C0 33.7467 4.25329 38 9.5 38H19V19H9.5C4.25329 19 0 23.2533 0 28.5Z" fill="#A259FF"/>
+            </svg>
+          </div>
+          <span class="text-[10px] font-mono text-pink-400 font-bold bg-pink-500/10 border border-pink-500/30 px-2 py-0.5 rounded">UI &bull; GRIDS</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">Figma Architecture</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Presentation Boards &bull; Moodboards &bull; Editorial Grids</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-pink-500 to-purple-500 h-full w-[90%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Editorial Layouts</span>
+          <span class="text-white font-bold">90%</span>
+        </div>
+      </div>
+
+      <!-- 7. CapCut Pro & Mobile Velocity -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-white border border-white/40 flex items-center justify-center text-black font-syne text-xl font-black shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-bolt text-2xl"></i>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">VIRAL PACE</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">CapCut Pro Suite</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Auto Captions &bull; Speed Curve Ramps &bull; Sound Sync</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-[94%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>Short-Form Speed</span>
+          <span class="text-white font-bold">94%</span>
+        </div>
+      </div>
+
+      <!-- 8. Generative AI & Audio Suite -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 group transition-all duration-300" data-tilt data-tilt-max="14">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-crimson to-purple-600 border border-brand-crimson/50 flex items-center justify-center text-white text-2xl shadow-[0_0_20px_rgba(255,26,42,0.4)] group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <span class="text-[10px] font-mono text-brand-crimson font-bold bg-brand-crimson/10 border border-brand-crimson/30 px-2 py-0.5 rounded">NEXT-GEN</span>
+        </div>
+        <h3 class="font-syne text-xl font-bold text-white mb-1">AI Enhancers &amp; SFX</h3>
+        <p class="text-xs font-mono text-brand-muted mb-4 uppercase">Voice Isolation &bull; Midjourney B-Roll &bull; 8D Audio</p>
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-brand-crimson to-purple-500 h-full w-[92%]"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-mono text-brand-muted mt-2">
+          <span>AI Pipeline</span>
+          <span class="text-white font-bold">92%</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: 3D PROJECT VAULT (All 15 Assets) -->
+  <section id="vault" class="py-24 px-4 sm:px-12 max-w-7xl mx-auto relative z-10 border-b border-white/10">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <div>
+        <div class="font-mono text-xs uppercase tracking-widest text-brand-crimson flex items-center gap-2 mb-2">
+          <span>[ CURATED ARCHIVE // 2026 ]</span>
+        </div>
+        <h2 class="font-syne text-3xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight">
+          THE 3D VAULT.
+        </h2>
+      </div>
+      <p class="font-mono text-xs text-brand-muted max-w-sm">
+        Explore 15 flagship commercial trailers, viral vertical reels, documentary masters, and visual posters.
+      </p>
     </div>
 
-    <div class="gallery-grid">
+    <!-- Category Filter Bar with 3D button hover -->
+    <div class="flex flex-wrap items-center gap-2 border-b border-white/10 pb-6 mb-12 font-mono text-xs">
+      <button onclick="applyVaultFilter('all')" class="vault-btn active bg-brand-crimson text-white px-4 py-2.5 rounded font-bold transition-all shadow-[0_0_15px_rgba(255,26,42,0.4)]">
+        ALL ASSETS (15)
+      </button>
+      <button onclick="applyVaultFilter('reels')" class="vault-btn bg-white/5 hover:bg-white/10 text-brand-muted hover:text-white px-4 py-2.5 rounded border border-white/10 transition-all">
+        VIRAL REELS 9:16 (3)
+      </button>
+      <button onclick="applyVaultFilter('talking')" class="vault-btn bg-white/5 hover:bg-white/10 text-brand-muted hover:text-white px-4 py-2.5 rounded border border-white/10 transition-all">
+        TALKING HEAD (3)
+      </button>
+      <button onclick="applyVaultFilter('commercial')" class="vault-btn bg-white/5 hover:bg-white/10 text-brand-muted hover:text-white px-4 py-2.5 rounded border border-white/10 transition-all">
+        APP &amp; COMMERCIAL (1)
+      </button>
+      <button onclick="applyVaultFilter('hospitality')" class="vault-btn bg-white/5 hover:bg-white/10 text-brand-muted hover:text-white px-4 py-2.5 rounded border border-white/10 transition-all">
+        HOSPITAL &amp; HOTEL (3)
+      </button>
+      <button onclick="applyVaultFilter('graphics')" class="vault-btn bg-white/5 hover:bg-white/10 text-brand-muted hover:text-white px-4 py-2.5 rounded border border-white/10 transition-all">
+        GRAPHIC ARTWORKS (5)
+      </button>
+    </div>
+
+    <!-- Vault Projects Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="vault-items-grid">
 
       <!-- 1. App Launching Video -->
-      <div class="project-card" data-cat="commercial" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-rocket"></i> Commercial Cut</div>
-            <div class="card-title">App Launching Showcase</div>
-            <div class="card-desc">High-tempo product trailer featuring motion mockups, screen tracking, and punchy transitions.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="commercial" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-rocket mr-1"></i> COMMERCIAL AD</span>
+              <span class="text-brand-dim">16:9 UHD</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">App Launching Showcase</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              High-tempo product trailer featuring motion mockups, screen tracking, and punchy transitions.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
-      <!-- 2. Reel 1 -->
-      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-9-16">
-          <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
-            <div class="card-title">Viral Reel Edit #01</div>
-            <div class="card-desc">Retention-focused visual hook with beat-synced transitions and dynamic frame re-scaling.</div>
+      <!-- 2. Viral Reel 01 -->
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="reels" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-9-16 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM REEL
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-brands fa-instagram mr-1"></i> VIRAL SHORT</span>
+              <span class="text-brand-dim">9:16 VERTICAL</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Retention Reel Cut #01</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Retention-focused visual hook with beat-synced transitions and dynamic frame re-scaling.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
-      <!-- 3. Reel 2 -->
-      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-9-16">
-          <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
-            <div class="card-title">Viral Reel Edit #02</div>
-            <div class="card-desc">Fast narrative pacing with stylized kinetic subtitle animations and immersive SFX.</div>
+      <!-- 3. Viral Reel 02 -->
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="reels" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-9-16 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM REEL
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-brands fa-instagram mr-1"></i> VIRAL SHORT</span>
+              <span class="text-brand-dim">9:16 VERTICAL</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Retention Reel Cut #02</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Fast narrative pacing with stylized kinetic subtitle animations and immersive SFX.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
-      <!-- 4. Reel 3 -->
-      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-9-16">
-          <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
-            <div class="card-title">Viral Reel Edit #03</div>
-            <div class="card-desc">Cinematic color grading, aggressive drop-in zooms, and hook framing engineered for views.</div>
+      <!-- 4. Viral Reel 03 -->
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="reels" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-9-16 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM REEL
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-brands fa-instagram mr-1"></i> VIRAL SHORT</span>
+              <span class="text-brand-dim">9:16 VERTICAL</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Retention Reel Cut #03</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Cinematic color grading, aggressive drop-in zooms, and hook framing engineered for views.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 5. Talking Head 1 -->
-      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
-            <div class="card-title">Talking Head Master #01</div>
-            <div class="card-desc">Seamless jump-cut elimination, clean dialogue leveling, and contextual motion graphics.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="talking" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-microphone-lines mr-1"></i> CREATOR MASTER</span>
+              <span class="text-brand-dim">16:9 NARRATIVE</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Talking Head Master #01</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Seamless jump-cut elimination, clean dialogue leveling, and contextual motion graphics.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 6. Talking Head 2 -->
-      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
-            <div class="card-title">Talking Head Master #02</div>
-            <div class="card-desc">Multi-angle B-roll intercuts, retention charts, and clear sound mastering.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="talking" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-microphone-lines mr-1"></i> CREATOR MASTER</span>
+              <span class="text-brand-dim">16:9 NARRATIVE</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Talking Head Master #02</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Multi-angle B-roll intercuts, retention charts, and clear sound mastering.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 7. Talking Head 3 -->
-      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
-            <div class="card-title">Talking Head Master #03</div>
-            <div class="card-desc">Authority-building narrative cut with dynamic zoom accents and screen overlays.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="talking" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-microphone-lines mr-1"></i> CREATOR MASTER</span>
+              <span class="text-brand-dim">16:9 NARRATIVE</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Talking Head Master #03</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Authority-building narrative cut with dynamic zoom accents and screen overlays.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 8. Hospital 1 -->
-      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
-            <div class="card-title">Hospital Documentary #01</div>
-            <div class="card-desc">Professional corporate video highlighting surgical facilities, clean visual grading, and doctor profiles.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="hospitality" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-hospital mr-1"></i> HEALTHCARE</span>
+              <span class="text-brand-dim">DOCU-SERIES</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Hospital Documentary #01</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Professional corporate video highlighting surgical facilities, pristine visual grading, and doctor profiles.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 9. Hospital 2 -->
-      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
-            <div class="card-title">Hospital Documentary #02</div>
-            <div class="card-desc">Compassionate patient storytelling with subtle audio score and crisp corporate branding.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="hospitality" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-hospital mr-1"></i> HEALTHCARE</span>
+              <span class="text-brand-dim">DOCU-SERIES</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Hospital Documentary #02</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Compassionate patient storytelling with subtle audio score and crisp corporate branding.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 10. Hotel -->
-      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-hotel"></i> Hospitality Commercial</div>
-            <div class="card-title">Luxury Hotel Experience</div>
-            <div class="card-desc">Warm aesthetic color grade, fluid camera movements, and atmospheric spatial showcase.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="hospitality" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview" allow="autoplay" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> STREAM VIDEO
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-hotel mr-1"></i> HOSPITALITY</span>
+              <span class="text-brand-dim">LUXURY FILM</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Luxury Hotel Experience</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Warm aesthetic color grade, fluid spatial camera movement, and ambient audio design.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-play text-[10px]"></i> OPEN MASTER STREAM
           </a>
         </div>
       </div>
 
       <!-- 11. Graphic 1 -->
-      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
-            <div class="card-title">Visual Artwork Asset #01</div>
-            <div class="card-desc">Stylized branding composition with custom textures and typographic balance.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="graphics" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> FULL VIEW
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-palette mr-1"></i> GRAPHIC ART</span>
+              <span class="text-brand-dim">POSTER #01</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Visual Artwork Piece #01</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              High-impact poster geometry, typographical contrast, and custom textures crafted for brand identities.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-expand text-[10px]"></i> VIEW FULL CANVAS
           </a>
         </div>
       </div>
 
       <!-- 12. Graphic 2 -->
-      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
-            <div class="card-title">Visual Artwork Asset #02</div>
-            <div class="card-desc">Striking marketing creative tailored for digital conversion and engagement.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="graphics" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> FULL VIEW
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-palette mr-1"></i> GRAPHIC ART</span>
+              <span class="text-brand-dim">POSTER #02</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Visual Artwork Piece #02</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Clean digital ad composition crafted for high conversion and modern aesthetic impact.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-expand text-[10px]"></i> VIEW FULL CANVAS
           </a>
         </div>
       </div>
 
       <!-- 13. Graphic 3 -->
-      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
-            <div class="card-title">Visual Artwork Asset #03</div>
-            <div class="card-desc">High-contrast branding asset designed for social rollouts and ad sets.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="graphics" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> FULL VIEW
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-palette mr-1"></i> GRAPHIC ART</span>
+              <span class="text-brand-dim">POSTER #03</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Visual Artwork Piece #03</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Bold color theory experiment utilizing monochrome depth and focal highlights for digital advertising.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-expand text-[10px]"></i> VIEW FULL CANVAS
           </a>
         </div>
       </div>
 
       <!-- 14. Graphic 4 -->
-      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
-            <div class="card-title">Visual Artwork Asset #04</div>
-            <div class="card-desc">Custom aesthetic design asset with sharp visual hierarchy.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="graphics" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> FULL VIEW
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-palette mr-1"></i> GRAPHIC ART</span>
+              <span class="text-brand-dim">POSTER #04</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Visual Artwork Piece #04</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Vibrant social campaign creative engineered for instant thumb-stopping visual interest.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-expand text-[10px]"></i> VIEW FULL CANVAS
           </a>
         </div>
       </div>
 
       <!-- 15. Graphic 5 -->
-      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
-        <div class="media-window ratio-16-9">
-          <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview"></iframe>
-        </div>
-        <div class="card-content">
-          <div>
-            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
-            <div class="card-title">Visual Artwork Asset #05</div>
-            <div class="card-desc">Sleek poster design combining modern layout principles and brand styling.</div>
+      <div class="project-box glass-card rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between" data-category="graphics" data-tilt data-tilt-max="8">
+        <div>
+          <div class="embed-box ratio-16-9 bg-black border-b border-white/10">
+            <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview" loading="lazy"></iframe>
           </div>
-          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="btn-stream">
-            <i class="fa-solid fa-expand"></i> FULL VIEW
+          <div class="p-6">
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-brand-crimson font-bold uppercase"><i class="fa-solid fa-palette mr-1"></i> GRAPHIC ART</span>
+              <span class="text-brand-dim">POSTER #05</span>
+            </div>
+            <h3 class="font-syne text-xl font-bold text-white mb-2">Visual Artwork Piece #05</h3>
+            <p class="text-xs font-sans text-brand-muted leading-relaxed">
+              Sleek poster design combining minimal layout principles and bold aesthetic accents.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-2">
+          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-brand-crimson text-white text-xs font-mono font-bold py-2.5 rounded border border-white/10 transition-all">
+            <i class="fa-solid fa-expand text-[10px]"></i> VIEW FULL CANVAS
           </a>
         </div>
       </div>
@@ -1346,144 +908,190 @@
     </div>
   </section>
 
-  <!-- Connect Section -->
-  <section id="contact">
-    <div class="section-title-wrap">
-      <h2>// INITIATE COLLABORATION</h2>
-      <p>&lt; DIRECT LINES FOR COMMISSIONS &amp; PROJECTS &gt;</p>
-    </div>
+  <!-- 3D CYBER TERMINAL CONTACT SECTION -->
+  <section id="contact" class="py-24 px-4 sm:px-12 max-w-7xl mx-auto relative z-10">
+    <div class="glass-card rounded-3xl p-8 sm:p-14 border border-white/15 relative overflow-hidden" data-tilt data-tilt-max="5">
+      
+      <!-- Watermark Background -->
+      <div class="absolute -right-6 -bottom-6 font-syne font-black text-8xl sm:text-9xl text-white/[0.02] select-none pointer-events-none">
+        ARCUS
+      </div>
 
-    <div class="contact-grid">
-      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="contact-card" data-tilt data-tilt-max="10">
-        <i class="fa-brands fa-whatsapp"></i>
-        <h4>WHATSAPP</h4>
-        <span>+91 8109780994</span>
-      </a>
+      <div class="max-w-2xl space-y-6">
+        <div class="font-mono text-xs uppercase tracking-widest text-brand-crimson flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-brand-crimson animate-pulse"></span>
+          <span>[ INITIATE 3D DIRECT COMMISSIONS ]</span>
+        </div>
 
-      <a href="tel:8109780994" class="contact-card" data-tilt data-tilt-max="10">
-        <i class="fa-solid fa-phone-volume"></i>
-        <h4>DIRECT LINE</h4>
-        <span>Call or SMS</span>
-      </a>
+        <h2 class="font-syne text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
+          READY TO ENGINEER YOUR NEXT MASTERPIECE?
+        </h2>
 
-      <a href="mailto:arcus0994@gmail.com" class="contact-card" data-tilt data-tilt-max="10">
-        <i class="fa-solid fa-terminal"></i>
-        <h4>EMAIL</h4>
-        <span>arcus0994@gmail.com</span>
-      </a>
+        <p class="font-sans text-brand-muted text-sm sm:text-base leading-relaxed">
+          Available for commercial edits, viral short-form retention campaigns, creative directing, and brand identity projects. Fast turnaround guaranteed.
+        </p>
 
-      <a href="https://instagram.com/arcu_sx" target="_blank" class="contact-card" data-tilt data-tilt-max="10">
-        <i class="fa-brands fa-instagram"></i>
-        <h4>INSTAGRAM</h4>
-        <span>@arcu_sx</span>
-      </a>
+        <!-- Direct Contact Action Tiles -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+          
+          <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project!" target="_blank" class="glass-card p-5 rounded-xl border border-white/10 hover:border-brand-crimson transition-all group">
+            <i class="fa-brands fa-whatsapp text-3xl text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></i>
+            <div class="font-syne font-bold text-white text-base">WHATSAPP</div>
+            <div class="font-mono text-xs text-brand-muted mt-1">+91 8109780994</div>
+          </a>
+
+          <a href="tel:8109780994" class="glass-card p-5 rounded-xl border border-white/10 hover:border-brand-crimson transition-all group">
+            <i class="fa-solid fa-phone text-3xl text-brand-crimson mb-2 group-hover:scale-110 transition-transform"></i>
+            <div class="font-syne font-bold text-white text-base">DIRECT CALL</div>
+            <div class="font-mono text-xs text-brand-muted mt-1">+91 8109780994</div>
+          </a>
+
+          <a href="https://instagram.com/arcu_sx" target="_blank" class="glass-card p-5 rounded-xl border border-white/10 hover:border-brand-crimson transition-all group">
+            <i class="fa-brands fa-instagram text-3xl text-pink-500 mb-2 group-hover:scale-110 transition-transform"></i>
+            <div class="font-syne font-bold text-white text-base">INSTAGRAM</div>
+            <div class="font-mono text-xs text-brand-muted mt-1">@arcu_sx</div>
+          </a>
+
+          <a href="mailto:arcus0994@gmail.com" class="glass-card p-5 rounded-xl border border-white/10 hover:border-brand-crimson transition-all group">
+            <i class="fa-solid fa-envelope text-3xl text-blue-400 mb-2 group-hover:scale-110 transition-transform"></i>
+            <div class="font-syne font-bold text-white text-base">EMAIL</div>
+            <div class="font-mono text-xs text-brand-muted mt-1 break-all">arcus0994@gmail.com</div>
+          </a>
+
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer>
-    <p>// ARCUS &copy; 2026. 100+ CURATED ASSETS DELIVERED. CRAFTED FOR HIGH IMPACT.</p>
+  <footer class="border-t border-white/10 bg-brand-obsidian py-8 px-4 sm:px-12 font-mono text-xs text-brand-dim text-center relative z-10">
+    <p>ARCUS &copy; 2026 // 2+ YEARS PRODUCTION EXCELLENCE // ALL RIGHTS RESERVED.</p>
   </footer>
 
   <script>
-    // 3D Three.js Interactive WebGL Background (Torus Knot + Particle Field)
-    (function init3DWorld() {
-      const canvas = document.getElementById('canvas3d');
-      const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, powerPreference: "high-performance" });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
+    // 1. Interactive Three.js 3D Cyber Particle Mesh
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('webgl-canvas');
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.z = 240;
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+      
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      // Particle Nebula (Lightweight 60FPS)
-      const count = 180;
-      const geo = new THREE.BufferGeometry();
-      const pos = new Float32Array(count * 3);
-      for(let i = 0; i < count * 3; i += 3) {
-        pos[i] = (Math.random() - 0.5) * 650;
-        pos[i+1] = (Math.random() - 0.5) * 650;
-        pos[i+2] = (Math.random() - 0.5) * 450;
+      // Particle Geometry
+      const particlesCount = 700;
+      const posArray = new Float32Array(particlesCount * 3);
+      for(let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 15;
       }
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const mat = new THREE.PointsMaterial({
-        color: 0xff2222,
-        size: 2.8,
+      const particlesGeometry = new THREE.BufferGeometry();
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+      // Crimson Cyber Material
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.035,
+        color: 0xff1a2a,
         transparent: true,
         opacity: 0.75
       });
-      const particleField = new THREE.Points(geo, mat);
-      scene.add(particleField);
+      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particlesMesh);
 
-      // 3D Torus Knot Geometry
-      const torusGeo = new THREE.TorusKnotGeometry(45, 11, 64, 12);
-      const torusMat = new THREE.MeshBasicMaterial({
-        color: 0xff2222,
+      // Floating Wireframe Geometric Icosahedron
+      const wireGeo = new THREE.IcosahedronGeometry(2.5, 1);
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0xff1a2a,
         wireframe: true,
         transparent: true,
-        opacity: 0.16
+        opacity: 0.15
       });
-      const torusMesh = new THREE.Mesh(torusGeo, torusMat);
-      scene.add(torusMesh);
+      const wireSphere = new THREE.Mesh(wireGeo, wireMat);
+      wireSphere.position.set(3, 0, -2);
+      scene.add(wireSphere);
 
-      let mouseX = 0, mouseY = 0;
+      camera.position.z = 5;
+
+      // Mouse Move Parallax
+      let mouseX = 0;
+      let mouseY = 0;
       window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.0004;
-        mouseY = (e.clientY - window.innerHeight / 2) * 0.0004;
-      }, { passive: true });
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+      });
 
-      function animate() {
+      // Animation Loop
+      const animate = () => {
         requestAnimationFrame(animate);
-        torusMesh.rotation.x += 0.002 + mouseY * 0.08;
-        torusMesh.rotation.y += 0.0025 + mouseX * 0.08;
-        particleField.rotation.y -= 0.0006;
+        particlesMesh.rotation.y += 0.0015;
+        particlesMesh.rotation.x += 0.0008;
+
+        wireSphere.rotation.x += 0.003;
+        wireSphere.rotation.y += 0.004;
+
+        // Smooth mouse reaction
+        particlesMesh.rotation.y += mouseX * 0.02;
+        particlesMesh.rotation.x += mouseY * 0.02;
+        wireSphere.rotation.y += mouseX * 0.03;
+
         renderer.render(scene, camera);
-      }
+      };
       animate();
 
+      // Window Resize
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
-    })();
-
-    // Custom Neon Cyber Cursor Logic
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('follower');
-    document.addEventListener('mousemove', (e) => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-      follower.style.left = e.clientX + 'px';
-      follower.style.top = e.clientY + 'px';
     });
 
-    // Live HUD Timecode Simulation
-    setInterval(() => {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      const f = String(Math.floor(Math.random() * 60)).padStart(2, '0');
-      document.getElementById('timecode').innerText = `TC ${h}:${m}:${s}:${f}`;
-    }, 100);
+    // 2. Custom Magnetic Cursor
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+    window.addEventListener('mousemove', (e) => {
+      if(cursorDot && cursorRing) {
+        cursorDot.style.left = `${e.clientX}px`;
+        cursorDot.style.top = `${e.clientY}px`;
+        cursorRing.style.left = `${e.clientX}px`;
+        cursorRing.style.top = `${e.clientY}px`;
+      }
+    });
 
-    // Interactive Category Filter Logic
-    function applyFilter(cat) {
-      const btns = document.querySelectorAll('.filter-btn');
-      btns.forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+    // 3. Vault Filtering Animation
+    function applyVaultFilter(category) {
+      const btns = document.querySelectorAll('.vault-btn');
+      btns.forEach(btn => {
+        btn.classList.remove('active', 'bg-brand-crimson', 'text-white', 'shadow-[0_0_15px_rgba(255,26,42,0.4)]');
+        btn.classList.add('bg-white/5', 'text-brand-muted');
+      });
 
-      const cards = document.querySelectorAll('.project-card');
-      cards.forEach(card => {
-        if (cat === 'all' || card.getAttribute('data-cat') === cat) {
-          card.style.display = 'flex';
+      event.currentTarget.classList.add('active', 'bg-brand-crimson', 'text-white', 'shadow-[0_0_15px_rgba(255,26,42,0.4)]');
+      event.currentTarget.classList.remove('bg-white/5', 'text-brand-muted');
+
+      const items = document.querySelectorAll('.project-box');
+      items.forEach(box => {
+        const itemCat = box.getAttribute('data-category');
+        if(category === 'all' || itemCat === category) {
+          box.style.display = 'flex';
         } else {
-          card.style.display = 'none';
+          box.style.display = 'none';
         }
       });
     }
+
+    // 4. Initialize Vanilla-Tilt 3D cards
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof VanillaTilt !== 'undefined') {
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"), {
+          max: 12,
+          speed: 400,
+          glare: true,
+          "max-glare": 0.35,
+          scale: 1.02
+        });
+      }
+    });
   </script>
 
 </body>
