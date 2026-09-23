@@ -8,318 +8,424 @@
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Three.js (Optimized CDN) & Vanilla Tilt -->
+  <!-- Three.js (WebGL 3D Engine) & Vanilla Tilt -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 
   <style>
     :root {
-      --bg: #07080a;
-      --paper: #0f1115;
-      --paper-border: rgba(255, 255, 255, 0.08);
-      --red: #ff2222;
-      --red-glow: rgba(255, 34, 34, 0.4);
-      --text: #f0f2f5;
-      --text-muted: #8b929d;
-      --text-dim: #4e5562;
-      --font-display: 'Syne', sans-serif;
+      --bg: #050608;
+      --card-bg: rgba(12, 14, 20, 0.78);
+      --card-border: rgba(239, 68, 68, 0.22);
+      --neon-red: #ef4444;
+      --neon-crimson: #dc2626;
+      --neon-purple: #9333ea;
+      --electric-glow: 0 0 25px rgba(239, 68, 68, 0.45);
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --font-display: 'Orbitron', sans-serif;
       --font-mono: 'Space Mono', monospace;
-      --font-body: 'Space Grotesk', sans-serif;
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: var(--font-body);
-      -webkit-font-smoothing: antialiased;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      scroll-behavior: smooth;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text);
       overflow-x: hidden;
-      padding: 24px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       position: relative;
     }
 
-    /* Hardware Accelerated 3D Background Canvas */
-    #bg-canvas {
+    /* 3D WebGL Canvas */
+    #webgl-bg {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.65;
+      opacity: 0.75;
     }
 
-    /* Behance Architectural Grid */
-    .bg-grid {
+    /* CRT Scanline Overlay */
+    body::before {
+      content: " ";
+      display: block;
       position: fixed;
-      inset: 0;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 70px 70px;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+      z-index: 999;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    /* Ambient Glows */
+    .glow-red {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.16) 0%, transparent 65%);
+      top: -100px;
+      left: 10%;
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Main Behance Document Canvas */
-    .behance-canvas {
-      width: 100%;
-      max-width: 1220px;
-      background: var(--paper);
-      border: 1px solid var(--paper-border);
-      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
-      position: relative;
-      z-index: 1;
-      backdrop-filter: blur(12px);
-    }
-
-    .spread {
-      position: relative;
-      padding: 4.5rem 6%;
-      border-bottom: 1px solid var(--paper-border);
-    }
-
-    .meta-ribbon {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 3rem;
-      border-bottom: 1px solid var(--paper-border);
-      padding-bottom: 1rem;
-    }
-
-    .active-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    .active-badge .dot {
-      width: 7px;
-      height: 7px;
-      background: var(--red);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--red);
-    }
-
-    /* SPREAD 01: COVER */
-    .cover-spread {
-      min-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding-top: 3.5rem;
-    }
-
-    .cover-top-sub {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      letter-spacing: 3px;
-      color: var(--red);
-      text-transform: uppercase;
-      margin-bottom: 1.2rem;
-    }
-
-    .cover-main-headline {
-      font-family: var(--font-display);
-      font-size: clamp(3.8rem, 8.5vw, 8.2rem);
-      font-weight: 900;
-      line-height: 0.9;
-      letter-spacing: -2px;
-      text-transform: uppercase;
-      margin-bottom: 2.5rem;
-    }
-
-    .cover-main-headline span.outline {
-      color: transparent;
-      -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.4);
-    }
-
-    .cover-main-headline span.accent {
-      color: var(--red);
-    }
-
-    .cover-bottom-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 2rem;
-      border-top: 1px solid var(--paper-border);
-      padding-top: 2rem;
-      align-items: flex-end;
-    }
-
-    .cover-desc {
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 530px;
-    }
-
-    .cover-stat-box {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .cover-stat-box strong {
-      display: block;
-      font-family: var(--font-display);
-      font-size: 2.4rem;
-      color: #fff;
-      line-height: 1.1;
-      margin-bottom: 4px;
-    }
-
-    /* SPREAD 02: ABOUT & 2 YEARS EXP */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .editorial-portrait-box {
-      position: relative;
-      border: 1px solid var(--paper-border);
-      padding: 12px;
-      background: #000;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    .editorial-portrait-box img {
-      width: 100%;
-      height: 480px;
-      object-fit: cover;
-      display: block;
-      filter: contrast(1.1);
-    }
-
-    .experience-stamp {
+    .glow-secondary {
       position: absolute;
-      top: -15px;
-      right: -15px;
-      background: var(--red);
-      color: #fff;
-      padding: 14px 20px;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      box-shadow: 0 10px 25px rgba(255, 34, 34, 0.4);
-      z-index: 2;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(147, 51, 234, 0.12) 0%, transparent 65%);
+      top: 400px;
+      right: 5%;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .about-info-col h3 {
-      font-family: var(--font-display);
-      font-size: 2.8rem;
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -0.5px;
-      text-transform: uppercase;
-      margin-bottom: 1.8rem;
-    }
-
-    .about-info-col p {
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      line-height: 1.8;
-      margin-bottom: 2rem;
-    }
-
-    .timeline-strip {
-      border-top: 1px solid var(--paper-border);
-      padding-top: 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .timeline-item {
-      border-left: 2px solid var(--red);
-      padding-left: 14px;
-    }
-
-    .timeline-year {
+    /* Top HUD Director Bar */
+    .hud-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 6%;
+      background: rgba(5, 6, 8, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       font-family: var(--font-mono);
       font-size: 0.75rem;
-      color: var(--red);
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-
-    .timeline-title {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 800;
-      margin: 3px 0;
-    }
-
-    .timeline-desc {
-      font-size: 0.82rem;
       color: var(--text-dim);
+      letter-spacing: 1.5px;
+      position: relative;
+      z-index: 1001;
     }
 
-    /* SPREAD 03: SOFTWARE ARSENAL */
-    .section-headline {
-      font-family: var(--font-display);
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -1px;
-      margin-bottom: 3rem;
-    }
-
-    .tools-board {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .tool-box {
-      border: 1px solid var(--paper-border);
-      background: rgba(255, 255, 255, 0.02);
-      padding: 2rem;
+    .rec-indicator {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      will-change: transform;
-      transform-style: preserve-3d;
+      align-items: center;
+      gap: 7px;
+      color: var(--neon-red);
+      font-weight: 700;
     }
 
-    .tool-box:hover {
-      border-color: var(--red);
+    .rec-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--neon-red);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-red);
+      animation: blink 1.2s infinite;
     }
 
-    .tool-header {
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* Navbar */
+    nav {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(16px);
+      background: rgba(5, 6, 8, 0.88);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 1000;
+      padding: 1rem 6%;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--neon-red);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+    }
+
+    .logo-brand {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, #ffffff 0%, #ef4444 60%, #9333ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: var(--electric-glow);
+    }
+
+    .logo-brand sub {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--neon-red);
+      -webkit-text-fill-color: var(--neon-red);
+      margin-left: 4px;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      margin-left: 2rem;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+      text-shadow: 0 0 10px var(--neon-red);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 5.5rem 6% 4.5rem;
+      text-align: center;
+      max-width: 1050px;
+      margin: 0 auto;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-avatar-wrap {
+      position: relative;
+      width: 155px;
+      height: 155px;
+      margin-bottom: 2rem;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .hero-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--neon-red);
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.6);
+      filter: contrast(1.08);
+      display: block;
+    }
+
+    .hud-corner-tl, .hud-corner-br {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--neon-red);
+      pointer-events: none;
+    }
+    .hud-corner-tl { top: -8px; left: -8px; border-right: none; border-bottom: none; }
+    .hud-corner-br { bottom: -8px; right: -8px; border-left: none; border-top: none; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 22px;
+      border-radius: 4px;
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--neon-red);
+      border-right: 3px solid var(--neon-purple);
+      color: #fca5a5;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
       margin-bottom: 1.5rem;
     }
 
-    .app-badge-icon {
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6vw, 4.4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: 2px;
+      margin-bottom: 1.4rem;
+      text-transform: uppercase;
+    }
+
+    .hero h1 .neon-text {
+      background: linear-gradient(135deg, #ffffff 15%, #ef4444 65%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.6));
+    }
+
+    .hero p {
+      font-size: 1.12rem;
+      color: var(--text-dim);
+      margin-bottom: 2.4rem;
+      max-width: 760px;
+      line-height: 1.7;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.95rem 2.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-neon {
+      background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
+      color: #fff;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
+      border: none;
+    }
+
+    .btn-neon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.85);
+    }
+
+    .btn-outline {
+      background: rgba(12, 14, 20, 0.85);
+      color: var(--text);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-outline:hover {
+      border-color: #fff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    /* Metric Strip (2+ Years & 100+ Assets) */
+    .metric-strip {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 950px;
+    }
+
+    .metric-box {
+      background: rgba(12, 14, 20, 0.8);
+      border: 1px solid var(--card-border);
+      padding: 1.4rem;
+      text-align: center;
+      border-radius: 6px;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    .metric-num {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Section Global Styles */
+    section {
+      padding: 5rem 6%;
+      max-width: 1300px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .section-header p {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--neon-red);
+      letter-spacing: 1.5px;
+    }
+
+    /* Software Suite with 3D Tilt */
+    .software-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .app-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      will-change: transform;
+      transform-style: preserve-3d;
+      transition: border-color 0.3s;
+    }
+
+    .app-card:hover {
+      border-color: var(--neon-red);
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .app-badge {
       width: 44px;
       height: 44px;
       border-radius: 8px;
@@ -328,111 +434,112 @@
       justify-content: center;
       font-family: var(--font-display);
       font-weight: 900;
-      font-size: 1.3rem;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      font-size: 1.25rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     }
 
-    .icon-pr { background: #00005b; color: #9999ff; border-color: #9999ff; }
-    .icon-ae { background: #00005b; color: #d291ff; border-color: #d291ff; }
-    .icon-dv { background: #1a1a24; color: #ff6060; border-color: #ff6060; }
-    .icon-ps { background: #001e36; color: #31a8ff; border-color: #31a8ff; }
-    .icon-ai { background: #330000; color: #ff9a00; border-color: #ff9a00; }
-    .icon-figma { background: #18191d; color: #0acf83; border-color: #0acf83; }
+    .badge-pr { background: #00005b; color: #9999ff; border: 1px solid #9999ff; }
+    .badge-ae { background: #00005b; color: #d291ff; border: 1px solid #d291ff; }
+    .badge-dv { background: #1a1a24; color: #ff5555; border: 1px solid #ff5555; }
+    .badge-ps { background: #001e36; color: #31a8ff; border: 1px solid #31a8ff; }
+    .badge-ai { background: #330000; color: #ff9a00; border: 1px solid #ff9a00; }
+    .badge-figma { background: #1a1a24; color: #0acf83; border: 1px solid #0acf83; }
 
-    .tool-badge {
+    .app-tag {
       font-family: var(--font-mono);
       font-size: 0.68rem;
-      border: 1px solid var(--paper-border);
-      padding: 4px 10px;
+      color: var(--text-dim);
+      border: 1px solid var(--card-border);
+      padding: 4px 8px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--text-muted);
     }
 
-    .tool-title {
+    .app-title {
       font-family: var(--font-display);
-      font-size: 1.3rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+      font-size: 1.2rem;
+      font-weight: 700;
       margin-bottom: 0.4rem;
+      color: #fff;
     }
 
-    .tool-desc {
+    .app-desc {
       font-size: 0.85rem;
-      color: var(--text-muted);
+      color: var(--text-dim);
       line-height: 1.6;
     }
 
-    /* SPREAD: CLIENT TESTIMONIALS / REVIEWS */
+    /* Client Reviews Grid */
     .reviews-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.6rem;
     }
 
-    .review-card {
-      border: 1px solid var(--paper-border);
-      background: rgba(255, 255, 255, 0.02);
-      padding: 2.2rem 2rem;
+    .review-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 2.2rem 1.8rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
       will-change: transform;
       transform-style: preserve-3d;
+      transition: border-color 0.3s;
     }
 
-    .review-card:hover {
-      border-color: var(--red);
-      background: rgba(255, 34, 34, 0.02);
+    .review-tile:hover {
+      border-color: var(--neon-red);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
     }
 
-    .stars-strip {
-      color: #ffb703;
+    .stars {
+      color: #f59e0b;
       font-size: 0.85rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       display: flex;
       gap: 4px;
     }
 
-    .review-text {
-      font-size: 0.95rem;
-      color: var(--text-muted);
+    .review-quote {
+      font-size: 0.92rem;
+      color: #cbd5e1;
       line-height: 1.7;
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.6rem;
       font-style: italic;
     }
 
-    .client-author {
+    .client-meta {
       display: flex;
       align-items: center;
       gap: 12px;
-      border-top: 1px solid var(--paper-border);
+      border-top: 1px solid var(--card-border);
       padding-top: 1.2rem;
     }
 
     .client-avatar {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--neon-red);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
       font-weight: 800;
-      color: var(--red);
-      border: 1px solid var(--paper-border);
+      color: var(--neon-red);
     }
 
     .client-name {
       font-family: var(--font-display);
       font-size: 0.95rem;
       font-weight: 700;
+      color: #fff;
     }
 
-    .client-role {
+    .client-sub {
       font-family: var(--font-mono);
       font-size: 0.72rem;
       color: var(--text-dim);
@@ -440,727 +547,776 @@
       text-transform: uppercase;
     }
 
-    /* SPREADS: WORK CASES */
-    .case-spread {
-      padding: 4.5rem 6%;
-    }
-
-    .case-header-bar {
+    /* Filter Tabs & Gallery */
+    .filter-wrap {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      border-bottom: 1px solid var(--paper-border);
-      padding-bottom: 1.5rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .case-number {
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--red);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    .case-title {
-      font-family: var(--font-display);
-      font-size: clamp(1.8rem, 3.5vw, 3rem);
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    .case-spec-tag {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      text-align: right;
-    }
-
-    .case-media-frame {
-      position: relative;
-      width: 100%;
-      background: #000;
-      border: 1px solid var(--paper-border);
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
-
-    .frame-16-9 { padding-top: 56.25%; }
-    .frame-9-16 { padding-top: 135%; max-width: 480px; margin-left: auto; margin-right: auto; }
-
-    .case-media-frame iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .case-footer-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
       flex-wrap: wrap;
-      gap: 1rem;
-      padding-top: 1rem;
+      margin-bottom: 3rem;
     }
 
-    .case-caption {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      max-width: 650px;
-      line-height: 1.6;
-    }
-
-    .open-stream-btn {
+    .filter-btn {
+      padding: 0.65rem 1.4rem;
+      background: rgba(15, 18, 28, 0.75);
+      border: 1px solid var(--card-border);
       font-family: var(--font-mono);
       font-size: 0.78rem;
-      font-weight: 700;
-      color: #fff;
-      text-decoration: none;
-      border: 1px solid var(--paper-border);
-      padding: 0.8rem 1.6rem;
-      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      cursor: pointer;
       text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
     }
 
-    .open-stream-btn:hover {
-      background: var(--red);
-      border-color: var(--red);
-      box-shadow: 0 0 20px var(--red-glow);
-    }
-
-    .reels-triptych {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-    }
-
-    .reel-col {
-      border: 1px solid var(--paper-border);
-      background: #000;
-      padding: 1rem;
-    }
-
-    .graphics-deck {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .graphic-card {
-      border: 1px solid var(--paper-border);
-      background: #000;
-      padding: 1rem;
-    }
-
-    /* SPREAD: CLOSING DIRECTORY */
-    .closing-spread {
-      padding: 6rem 6%;
-      text-align: center;
-    }
-
-    .closing-headline {
-      font-family: var(--font-display);
-      font-size: clamp(2.8rem, 6vw, 5.5rem);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -1px;
-      margin-bottom: 1.5rem;
-    }
-
-    .closing-sub {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto 3.5rem;
-      line-height: 1.8;
-    }
-
-    .directory-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 4rem;
-    }
-
-    .directory-tile {
-      border: 1px solid var(--paper-border);
-      padding: 2.2rem 1.5rem;
-      text-decoration: none;
+    .filter-btn.active, .filter-btn:hover {
+      background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
       color: #fff;
+      border-color: transparent;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.8rem;
-      transition: all 0.3s;
-      background: rgba(255, 255, 255, 0.015);
+      position: relative;
+      transition: all 0.35s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       will-change: transform;
       transform-style: preserve-3d;
     }
 
-    .directory-tile:hover {
-      border-color: var(--red);
-      background: rgba(255, 34, 34, 0.05);
+    .card:hover {
+      border-color: var(--neon-red);
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.35);
+      transform: translateY(-5px);
     }
 
-    .directory-tile i {
-      font-size: 2.2rem;
-      color: var(--red);
+    .viewer {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-bottom: 1px solid var(--card-border);
     }
 
-    .directory-tile strong {
+    .ratio-16-9 { padding-top: 56.25%; }
+    .ratio-9-16 { padding-top: 135%; }
+
+    .viewer iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    .card-info {
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+
+    .tag-category {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--neon-red);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title {
       font-family: var(--font-display);
-      font-size: 1.15rem;
+      font-size: 1.2rem;
+      font-weight: 700;
       letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      color: #fff;
     }
 
-    .directory-tile span {
+    .card-desc {
+      font-size: 0.86rem;
+      color: var(--text-dim);
+      margin-bottom: 1.3rem;
+      line-height: 1.6;
+    }
+
+    .btn-view {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.65rem 1.1rem;
       font-family: var(--font-mono);
       font-size: 0.78rem;
-      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s;
     }
 
-    .colophon {
+    .btn-view:hover {
+      background: var(--neon-red);
+      border-color: var(--neon-red);
+      box-shadow: 0 0 18px var(--neon-red);
+    }
+
+    /* Contact Grid */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .contact-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 2.2rem 1.4rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      border-radius: 8px;
+      transition: all 0.3s;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    .contact-tile:hover {
+      border-color: var(--neon-red);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.45);
+      transform: translateY(-4px);
+    }
+
+    .contact-tile i {
+      font-size: 2.2rem;
+      color: var(--neon-red);
+      filter: drop-shadow(0 0 12px var(--neon-red));
+      margin-bottom: 0.9rem;
+    }
+
+    .contact-tile h4 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.3rem;
+    }
+
+    .contact-tile span {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.82rem;
       color: var(--text-dim);
-      letter-spacing: 2px;
-      border-top: 1px solid var(--paper-border);
-      padding-top: 2rem;
     }
 
-    @media (max-width: 900px) {
-      .cover-bottom-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .about-grid { grid-template-columns: 1fr; }
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 2.5rem 6%;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.4rem; }
+      .nav-links { display: none; }
+      .gallery-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Super-Smooth 60FPS 3D WebGL Canvas -->
-  <canvas id="bg-canvas"></canvas>
-  <div class="bg-grid"></div>
+  <!-- 3D Three.js WebGL Interactive Canvas -->
+  <canvas id="webgl-bg"></canvas>
 
-  <!-- Behance 2026 Presentation Document Container -->
-  <main class="behance-canvas">
+  <!-- Top Director HUD Bar -->
+  <div class="hud-bar">
+    <div class="rec-indicator">
+      <div class="rec-dot"></div> [REC] 4K PRO-RES 60FPS
+    </div>
+    <div id="timecode">TC 00:02:14:28</div>
+    <div>EXP: 2+ YEARS // 100+ CURATED ASSETS</div>
+  </div>
 
-    <!-- =========================================
-         SPREAD 01: FRONT COVER SPREAD
-         ========================================= -->
-    <section class="spread cover-spread">
-      <div>
-        <div class="meta-ribbon">
-          <div class="active-badge"><span class="dot"></span> BEHANCE CURATED PORTFOLIO // 2026</div>
-          <div>ISSUE NO. 01 / ARCHIVE EDITION</div>
-          <div>DIRECTOR: ARCUS</div>
+  <div class="glow-red"></div>
+  <div class="glow-secondary"></div>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="brand-wrap">
+      <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w300" 
+           onerror="this.src='./profile.png';" 
+           alt="ARCUS" class="nav-avatar">
+      <div class="logo-brand">ARCUS<sub>STUDIO</sub></div>
+    </div>
+    <div class="nav-links">
+      <a href="#productions">// WORK VAULT</a>
+      <a href="#software">// ARSENAL</a>
+      <a href="#reviews">// REVIEWS</a>
+      <a href="#contact">// INITIATE</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-avatar-wrap" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.25">
+      <div class="hud-corner-tl"></div>
+      <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w1000" 
+           onerror="this.src='./profile.png';" 
+           alt="ARCUS Creator" class="hero-avatar">
+      <div class="hud-corner-br"></div>
+    </div>
+
+    <div class="hero-badge">
+      <i class="fa-solid fa-bolt"></i> 2+ YEARS PRODUCTION MASTERY
+    </div>
+    <h1>
+      CRAFTING <span class="neon-text">CINEMATIC REALITY</span>
+    </h1>
+    <p>
+      Brand identity &amp; cutting-edge video editing. Specializing in high-retention social reels, commercial storytelling, surgical pacing, and custom graphics tailored to dominate the digital screen.
+    </p>
+    <div class="cta-group">
+      <a href="#productions" class="btn btn-neon"><i class="fa-solid fa-play"></i> ACCESS SHOWCASE</a>
+      <a href="https://wa.me/918109780994?text=Hey%20ARCUS,%20let's%20collaborate%20on%20a%20project!" target="_blank" class="btn btn-outline"><i class="fa-brands fa-whatsapp"></i> INITIATE CHAT</a>
+    </div>
+
+    <!-- Live Metric Strip -->
+    <div class="metric-strip">
+      <div class="metric-box" data-tilt data-tilt-max="8">
+        <div class="metric-num">02+</div>
+        <div class="metric-label">Years of Experience</div>
+      </div>
+      <div class="metric-box" data-tilt data-tilt-max="8">
+        <div class="metric-num">100+</div>
+        <div class="metric-label">Curated Deliverables</div>
+      </div>
+      <div class="metric-box" data-tilt data-tilt-max="8">
+        <div class="metric-num">100%</div>
+        <div class="metric-label">Custom Sound &amp; Color</div>
+      </div>
+      <div class="metric-box" data-tilt data-tilt-max="8">
+        <div class="metric-num">24H</div>
+        <div class="metric-label">Rapid Turnaround</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Software Arsenal (Apps & Badges) -->
+  <section id="software">
+    <div class="section-header">
+      <h2>// SOFTWARE ARSENAL</h2>
+      <p>&lt; PRODUCTION ENGINE &amp; DESIGN STACK &gt;</p>
+    </div>
+
+    <div class="software-grid">
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-pr">Pr</div>
+          <div class="app-tag">TIMELINE ENGINE</div>
         </div>
-
-        <div class="cover-top-sub">// VISUAL ARCHITECTURE &amp; CINEMATIC CUTS</div>
-        <h1 class="cover-main-headline">
-          ARCUS <br>
-          <span class="outline">MOTION</span> <br>
-          <span class="accent">VAULT.</span>
-        </h1>
+        <div>
+          <div class="app-title">Adobe Premiere Pro</div>
+          <div class="app-desc">Pacing, narrative assembly, dialogue balancing, and surgical cuts.</div>
+        </div>
       </div>
 
-      <div class="cover-bottom-grid">
-        <p class="cover-desc">
-          Specializing in surgical video editing, retention-engineered viral reels, commercial product trailers, and brand identity design. 2+ years of high-tempo creative direction designed to dominate the visual landscape.
-        </p>
-        <div class="cover-stat-box">
-          <strong>02+</strong>
-          Years Production Experience
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-ae">Ae</div>
+          <div class="app-tag">MOTION SUITE</div>
         </div>
-        <div class="cover-stat-box">
-          <strong>100+</strong>
-          Curated Assets &amp; Deliverables
+        <div>
+          <div class="app-title">Adobe After Effects</div>
+          <div class="app-desc">Kinetic typography, screen tracking, visual transitions, and VFX.</div>
         </div>
       </div>
-    </section>
 
-    <!-- =========================================
-         SPREAD 02: ABOUT & 2 YEARS EXP EDITORIAL
-         ========================================= -->
-    <section class="spread">
-      <div class="meta-ribbon">
-        <div>02 // CURRICULUM &amp; ART DIRECTION</div>
-        <div>CREATOR BIOGRAPHY</div>
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-dv">Dv</div>
+          <div class="app-tag">COLOR SUITE</div>
+        </div>
+        <div>
+          <div class="app-title">DaVinci Resolve</div>
+          <div class="app-desc">Node-based film grading, LUT emulation, and cinematic color finish.</div>
+        </div>
       </div>
 
-      <div class="about-grid">
-        <div class="editorial-portrait-box" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
-          <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w1200" 
-               onerror="this.src='./profile.png';" 
-               alt="ARCUS Portrait Profile">
-          <div class="experience-stamp">2+ YEARS EXP</div>
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-ps">Ps</div>
+          <div class="app-tag">VISUAL DESIGN</div>
         </div>
+        <div>
+          <div class="app-title">Adobe Photoshop</div>
+          <div class="app-desc">High-CTR thumbnails, depth isolation, and custom poster art.</div>
+        </div>
+      </div>
 
-        <div class="about-info-col">
-          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--red); letter-spacing: 2px; margin-bottom: 0.5rem;">
-            // PROFILE STATEMENT
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-ai">Ai</div>
+          <div class="app-tag">VECTOR SUITE</div>
+        </div>
+        <div>
+          <div class="app-title">Adobe Illustrator</div>
+          <div class="app-desc">Vector brand identities, logo typography, and clean graphic layouts.</div>
+        </div>
+      </div>
+
+      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
+        <div class="app-header">
+          <div class="app-badge badge-figma">Fg</div>
+          <div class="app-tag">UI &amp; AI STACK</div>
+        </div>
+        <div>
+          <div class="app-title">Figma &amp; AI Tools</div>
+          <div class="app-desc">Interface mockups, generative frame expansions, and audio isolation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Client Reviews Section -->
+  <section id="reviews">
+    <div class="section-header">
+      <h2>// CLIENT TESTIMONIALS</h2>
+      <p>&lt; 100+ HIGH-IMPACT DELIVERIES FOR CREATORS &amp; BRANDS &gt;</p>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+        <div>
+          <div class="stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           </div>
-          <h3>SURGICAL STORYTELLING WITH ZERO WASTED FRAMES.</h3>
-          <p>
-            Operating at the intersection of cinematic rhythm and modern digital attention spans. Over the past <strong>2+ years</strong>, ARCUS has directed, cut, and polished commercial advertisements, corporate healthcare documentaries, luxury hotel showcases, and high-engagement social media campaigns across <strong>100+ curated client deliverables</strong>.
+          <p class="review-quote">
+            "ARCUS completely leveled up our product trailer! The motion tracking and surgical cut pacing kept viewers hooked from start to finish. Highly recommended for commercial edits."
           </p>
-
-          <div class="timeline-strip">
-            <div class="timeline-item">
-              <div class="timeline-year">2024 &mdash; 2025</div>
-              <div class="timeline-title">Foundational Precision</div>
-              <div class="timeline-desc">Mastering retention pacing, kinetic text styling, multi-cam talking head engineering, and visual hooks.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-year">2025 &mdash; 2026</div>
-              <div class="timeline-title">Commercial &amp; Identity</div>
-              <div class="timeline-desc">End-to-end commercial directing, app launch cinematics, DaVinci film color grading, and vector branding.</div>
-            </div>
-          </div>
         </div>
-      </div>
-    </section>
-
-    <!-- =========================================
-         SPREAD 03: SOFTWARE ARSENAL (APPS & LOGOS)
-         ========================================= -->
-    <section class="spread">
-      <div class="meta-ribbon">
-        <div>03 // PRODUCTION TOOLKIT</div>
-        <div>HARDWARE &amp; SOFTWARE STACK</div>
-      </div>
-
-      <h2 class="section-headline">SOFTWARE ARSENAL.</h2>
-
-      <div class="tools-board">
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-pr">Pr</div>
-            <div class="tool-badge">TIMELINE ENGINE</div>
-          </div>
-          <div class="tool-title">Adobe Premiere Pro</div>
-          <p class="tool-desc">Narrative rhythm, dialogue mastering, surgical cut pacing, and high-volume delivery.</p>
-        </div>
-
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-ae">Ae</div>
-            <div class="tool-badge">MOTION SUITE</div>
-          </div>
-          <div class="tool-title">Adobe After Effects</div>
-          <p class="tool-desc">Kinetic typography, screen tracking, visual transitions, SFX integration, and motion graphics.</p>
-        </div>
-
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-dv">Dv</div>
-            <div class="tool-badge">COLOR SUITE</div>
-          </div>
-          <div class="tool-title">DaVinci Resolve</div>
-          <p class="tool-desc">Node-based color grading, LUT emulation, skin-tone isolation, and high-fidelity HDR finish.</p>
-        </div>
-
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-ps">Ps</div>
-            <div class="tool-badge">VISUAL DESIGN</div>
-          </div>
-          <div class="tool-title">Adobe Photoshop</div>
-          <p class="tool-desc">Thumbnail design with high click-through rates, depth masking, and digital asset rendering.</p>
-        </div>
-
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-ai">Ai</div>
-            <div class="tool-badge">VECTOR SUITE</div>
-          </div>
-          <div class="tool-title">Adobe Illustrator</div>
-          <p class="tool-desc">Typography architecture, geometric logos, brand vector assets, and clean posters.</p>
-        </div>
-
-        <div class="tool-box" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <div class="tool-header">
-            <div class="app-badge-icon icon-figma">Fg</div>
-            <div class="tool-badge">UI &amp; ART DIRECTION</div>
-          </div>
-          <div class="tool-title">Figma &amp; AI Stack</div>
-          <p class="tool-desc">Mockup architecture, neural voice enhancements, frame expansions, and storyboard grids.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================
-         SPREAD 04: CLIENT REVIEWS & TESTIMONIALS
-         ========================================= -->
-    <section class="spread">
-      <div class="meta-ribbon">
-        <div>04 // CLIENT APPRAISALS</div>
-        <div>TESTIMONIALS &amp; FEEDBACK</div>
-      </div>
-
-      <h2 class="section-headline">WHAT CLIENTS SAY.</h2>
-
-      <div class="reviews-grid">
-        <div class="review-card" data-tilt data-tilt-max="6" data-tilt-speed="300">
+        <div class="client-meta">
+          <div class="client-avatar">AS</div>
           <div>
-            <div class="stars-strip">
-              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            </div>
-            <p class="review-text">
-              "ARCUS brought an unbelievable level of energy and surgical pacing to our app launch trailer. The motion tracking and sound design kept viewers glued to the screen till the last frame. 10/10 execution."
-            </p>
-          </div>
-          <div class="client-author">
-            <div class="client-avatar">AP</div>
-            <div>
-              <div class="client-name">Aman Sharma</div>
-              <div class="client-role">Founder, Tech App Studio</div>
-            </div>
+            <div class="client-name">Aman Sharma</div>
+            <div class="client-sub">Founder, Tech App Studio</div>
           </div>
         </div>
+      </div>
 
-        <div class="review-card" data-tilt data-tilt-max="6" data-tilt-speed="300">
+      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+        <div>
+          <div class="stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="review-quote">
+            "The retention on our Instagram Reels jumped significantly after ARCUS took over the editing. His beat syncing and kinetic typography are on another level."
+          </p>
+        </div>
+        <div class="client-meta">
+          <div class="client-avatar">RK</div>
           <div>
-            <div class="stars-strip">
-              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            </div>
-            <p class="review-text">
-              "Working with ARCUS transformed our Instagram Reels engagement. His understanding of retention hooks and kinetic typography doubled our average watch time within weeks."
-            </p>
-          </div>
-          <div class="client-author">
-            <div class="client-avatar">RK</div>
-            <div>
-              <div class="client-name">Rohan Kapoor</div>
-              <div class="client-role">Digital Creator &amp; Podcaster</div>
-            </div>
+            <div class="client-name">Rohan Kapoor</div>
+            <div class="client-sub">Digital Content Creator</div>
           </div>
         </div>
+      </div>
 
-        <div class="review-card" data-tilt data-tilt-max="6" data-tilt-speed="300">
+      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+        <div>
+          <div class="stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="review-quote">
+            "Our healthcare and luxury hotel videos looked incredibly cinematic. The subtle color grading and professional audio score gave our brand a premium international feel."
+          </p>
+        </div>
+        <div class="client-meta">
+          <div class="client-avatar">VN</div>
           <div>
-            <div class="stars-strip">
-              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            </div>
-            <p class="review-text">
-              "The healthcare documentary and hotel commercial edits were pristine. The color timing in DaVinci and the sensitive narrative pacing gave our brand an unmatched corporate elegance."
-            </p>
-          </div>
-          <div class="client-author">
-            <div class="client-avatar">VN</div>
-            <div>
-              <div class="client-name">Vikram Nair</div>
-              <div class="client-role">Hospitality Marketing Director</div>
-            </div>
+            <div class="client-name">Vikram Nair</div>
+            <div class="client-sub">Hospitality Brand Lead</div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- =========================================
-         SPREAD 05: CASE STUDY // APP LAUNCH COMMERCIAL
-         ========================================= -->
-    <section class="spread case-spread">
-      <div class="case-header-bar">
-        <div>
-          <div class="case-number">CASE NO. 01 // COMMERCIAL</div>
-          <div class="case-title">APP LAUNCHING SHOWCASE</div>
+  <!-- Production Vault (15 Assets) -->
+  <section id="productions">
+    <div class="section-header">
+      <h2>// PRODUCTION VAULT</h2>
+      <p>&lt; 100+ CURATED ASSETS DELIVERED // EXPLORE FLAGSHIP WORKS &gt;</p>
+    </div>
+
+    <!-- Interactive Filter Tabs -->
+    <div class="filter-wrap">
+      <button class="filter-btn active" onclick="applyFilter('all')">ALL (15)</button>
+      <button class="filter-btn" onclick="applyFilter('reels')">INSTAGRAM REELS</button>
+      <button class="filter-btn" onclick="applyFilter('talking-head')">TALKING HEAD</button>
+      <button class="filter-btn" onclick="applyFilter('commercial')">COMMERCIAL &amp; APP</button>
+      <button class="filter-btn" onclick="applyFilter('hospital-hotel')">HOSPITAL &amp; HOTEL</button>
+      <button class="filter-btn" onclick="applyFilter('graphics')">GRAPHIC DESIGNS</button>
+    </div>
+
+    <div class="gallery-grid">
+
+      <!-- 1. App Launching Video -->
+      <div class="card" data-cat="commercial" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview"></iframe>
         </div>
-        <div class="case-spec-tag">16:9 PRO-RES // COMMERCIAL AD</div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-rocket"></i> Commercial Cut</div>
+            <div class="card-title">App Launching Showcase</div>
+            <div class="card-desc">High-tempo product trailer featuring motion mockups, screen tracking, and punchy transitions.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="case-media-frame frame-16-9">
-        <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview"></iframe>
+      <!-- 2. Reel 1 -->
+      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-9-16">
+          <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
+            <div class="card-title">Viral Reel Edit #01</div>
+            <div class="card-desc">Retention-focused visual hook with beat-synced transitions and dynamic frame re-scaling.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="case-footer-meta">
-        <p class="case-caption">
-          High-tempo trailer combining modern interface tracking, punchy sound engineering, and dynamic mockup displays designed to maximize product awareness.
-        </p>
-        <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="open-stream-btn">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> FULL STREAM
-        </a>
-      </div>
-    </section>
-
-    <!-- =========================================
-         SPREAD 06: CASE STUDY // 9:16 VIRAL SOCIAL REELS
-         ========================================= -->
-    <section class="spread case-spread">
-      <div class="case-header-bar">
-        <div>
-          <div class="case-number">CASE NO. 02 // SHORT-FORM</div>
-          <div class="case-title">VIRAL RETENTION REELS (TRIPTYCH)</div>
+      <!-- 3. Reel 2 -->
+      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-9-16">
+          <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview"></iframe>
         </div>
-        <div class="case-spec-tag">9:16 VERTICAL // SOCIAL ENGAGEMENT</div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
+            <div class="card-title">Viral Reel Edit #02</div>
+            <div class="card-desc">Fast narrative pacing with stylized kinetic subtitle animations and immersive SFX.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="reels-triptych">
-        <div class="reel-col">
-          <div class="case-media-frame frame-9-16">
-            <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--red); margin: 0.8rem 0 0.2rem;">REEL 01</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Beat-synced hooks &amp; re-scaling.</div>
-          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">STREAM</a>
+      <!-- 4. Reel 3 -->
+      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-9-16">
+          <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview"></iframe>
         </div>
-
-        <div class="reel-col">
-          <div class="case-media-frame frame-9-16">
-            <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview"></iframe>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
+            <div class="card-title">Viral Reel Edit #03</div>
+            <div class="card-desc">Cinematic color grading, aggressive drop-in zooms, and hook framing engineered for views.</div>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--red); margin: 0.8rem 0 0.2rem;">REEL 02</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Kinetic text typography &amp; narrative speed.</div>
-          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">STREAM</a>
-        </div>
-
-        <div class="reel-col">
-          <div class="case-media-frame frame-9-16">
-            <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--red); margin: 0.8rem 0 0.2rem;">REEL 03</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Cinematic color grade &amp; frame hooks.</div>
-          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">STREAM</a>
+          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
         </div>
       </div>
-    </section>
 
-    <!-- =========================================
-         SPREAD 07: CASE STUDY // TALKING HEAD SERIES
-         ========================================= -->
-    <section class="spread case-spread">
-      <div class="case-header-bar">
-        <div>
-          <div class="case-number">CASE NO. 03 // MASTER TALKING HEAD</div>
-          <div class="case-title">AUTHORITY CREATOR SERIES</div>
+      <!-- 5. Talking Head 1 -->
+      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview"></iframe>
         </div>
-        <div class="case-spec-tag">16:9 // PODCAST &amp; CREATOR MASTERS</div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
+            <div class="card-title">Talking Head Master #01</div>
+            <div class="card-desc">Seamless jump-cut elimination, clean dialogue leveling, and contextual motion graphics.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="tools-board">
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview"></iframe>
-          </div>
-          <div class="tool-title" style="margin-top: 1rem;">Master Head Cut #01</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Seamless jump-cut masking with audio frequency balancing.</p>
-          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
+      <!-- 6. Talking Head 2 -->
+      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview"></iframe>
         </div>
-
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview"></iframe>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
+            <div class="card-title">Talking Head Master #02</div>
+            <div class="card-desc">Multi-angle B-roll intercuts, retention charts, and clear sound mastering.</div>
           </div>
-          <div class="tool-title" style="margin-top: 1rem;">Master Head Cut #02</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Multi-angle intercuts, contextual B-roll, and graphic charts.</p>
-          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
-        </div>
-
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview"></iframe>
-          </div>
-          <div class="tool-title" style="margin-top: 1rem;">Master Head Cut #03</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Rhythmic zoom framing with kinetic typography accents.</p>
-          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
+          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
         </div>
       </div>
-    </section>
 
-    <!-- =========================================
-         SPREAD 08: CASE STUDY // HOSPITAL & LUXURY HOTEL
-         ========================================= -->
-    <section class="spread case-spread">
-      <div class="case-header-bar">
-        <div>
-          <div class="case-number">CASE NO. 04 // CORPORATE &amp; HOSPITALITY</div>
-          <div class="case-title">HOSPITAL DOCUMENTARY &amp; LUXURY HOTEL</div>
+      <!-- 7. Talking Head 3 -->
+      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview"></iframe>
         </div>
-        <div class="case-spec-tag">COMMERCIAL CINEMA // COLOR TIMED</div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
+            <div class="card-title">Talking Head Master #03</div>
+            <div class="card-desc">Authority-building narrative cut with dynamic zoom accents and screen overlays.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="tools-board">
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview"></iframe>
-          </div>
-          <div class="tool-title" style="margin-top: 1rem;">Hospital Documentary #01</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Surgical room facility showcase and clean corporate color grade.</p>
-          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
+      <!-- 8. Hospital 1 -->
+      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview"></iframe>
         </div>
-
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview"></iframe>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
+            <div class="card-title">Hospital Documentary #01</div>
+            <div class="card-desc">Professional corporate video highlighting facilities, clean visual grading, and doctor profiles.</div>
           </div>
-          <div class="tool-title" style="margin-top: 1rem;">Hospital Documentary #02</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Patient-centric storytelling with ambient audio soundscapes.</p>
-          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
-        </div>
-
-        <div class="tool-box">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview"></iframe>
-          </div>
-          <div class="tool-title" style="margin-top: 1rem;">Luxury Hotel Commercial</div>
-          <p class="tool-desc" style="margin-bottom: 1rem;">Warm architectural color grade and slow fluid spatial showcase.</p>
-          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="open-stream-btn">STREAM CUT</a>
+          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
         </div>
       </div>
-    </section>
 
-    <!-- =========================================
-         SPREAD 09: CASE STUDY // GRAPHIC DESIGN ARCHIVE
-         ========================================= -->
-    <section class="spread case-spread">
-      <div class="case-header-bar">
-        <div>
-          <div class="case-number">CASE NO. 05 // GRAPHIC ARTS</div>
-          <div class="case-title">BRAND VISUAL IDENTITIES &amp; POSTERS</div>
+      <!-- 9. Hospital 2 -->
+      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview"></iframe>
         </div>
-        <div class="case-spec-tag">VECTOR // EDITORIAL ARTWORK</div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
+            <div class="card-title">Hospital Documentary #02</div>
+            <div class="card-desc">Compassionate patient storytelling with subtle audio score and crisp corporate branding.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
+        </div>
       </div>
 
-      <div class="graphics-deck">
-        <div class="graphic-card">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--red); margin: 0.8rem 0 0.2rem;">ARTWORK 01</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem;">Editorial Brand Texture Piece</div>
-          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">EXPAND ARTWORK</a>
+      <!-- 10. Hotel -->
+      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview"></iframe>
         </div>
-
-        <div class="graphic-card">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview"></iframe>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-hotel"></i> Hospitality Commercial</div>
+            <div class="card-title">Luxury Hotel Experience</div>
+            <div class="card-desc">Warm aesthetic color grade, fluid camera movements, and atmospheric spatial showcase.</div>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--red); margin: 0.8rem 0 0.2rem;">ARTWORK 02</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem;">Digital Marketing Composition</div>
-          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">EXPAND ARTWORK</a>
-        </div>
-
-        <div class="graphic-card">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--red); margin: 0.8rem 0 0.2rem;">ARTWORK 03</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem;">Grid Layout &amp; Identity System</div>
-          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">EXPAND ARTWORK</a>
-        </div>
-
-        <div class="graphic-card">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--red); margin: 0.8rem 0 0.2rem;">ARTWORK 04</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem;">High-CTR Campaign Visual</div>
-          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">EXPAND ARTWORK</a>
-        </div>
-
-        <div class="graphic-card">
-          <div class="case-media-frame frame-16-9">
-            <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview"></iframe>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--red); margin: 0.8rem 0 0.2rem;">ARTWORK 05</div>
-          <div style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem;">Minimalist Poster Architecture</div>
-          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="open-stream-btn" style="width: 100%; justify-content: center;">EXPAND ARTWORK</a>
+          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          </a>
         </div>
       </div>
-    </section>
 
-    <!-- =========================================
-         SPREAD 10: BACK COVER / COMMISSIONS DIRECTORY
-         ========================================= -->
-    <section class="spread closing-spread">
-      <div class="meta-ribbon" style="justify-content: center;">
-        <div>END OF PORTFOLIO ARCHIVE // 2026 EDITION</div>
+      <!-- 11. Graphic 1 -->
+      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
+            <div class="card-title">Visual Artwork Asset #01</div>
+            <div class="card-desc">Stylized branding composition with custom textures and typographic balance.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> FULL VIEW
+          </a>
+        </div>
       </div>
 
-      <h2 class="closing-headline">START A PROJECT.</h2>
-      <p class="closing-sub">
-        Available for commercial video editing, social retention reels, creative directing, and brand identity projects.
-      </p>
-
-      <div class="directory-grid">
-        <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project!" target="_blank" class="directory-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <i class="fa-brands fa-whatsapp"></i>
-          <strong>WHATSAPP</strong>
-          <span>+91 8109780994</span>
-        </a>
-
-        <a href="tel:8109780994" class="directory-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <i class="fa-solid fa-phone"></i>
-          <strong>DIRECT CALL</strong>
-          <span>+91 8109780994</span>
-        </a>
-
-        <a href="mailto:arcus0994@gmail.com" class="directory-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <i class="fa-solid fa-envelope"></i>
-          <strong>EMAIL</strong>
-          <span>arcus0994@gmail.com</span>
-        </a>
-
-        <a href="https://instagram.com/arcu_sx" target="_blank" class="directory-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
-          <i class="fa-brands fa-instagram"></i>
-          <strong>INSTAGRAM</strong>
-          <span>@arcu_sx</span>
-        </a>
+      <!-- 12. Graphic 2 -->
+      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
+            <div class="card-title">Visual Artwork Asset #02</div>
+            <div class="card-desc">Striking marketing creative tailored for digital conversion and engagement.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> FULL VIEW
+          </a>
+        </div>
       </div>
 
-      <div class="colophon">
-        ARCUS &copy; 2026 // 100+ CURATED ASSETS DELIVERED // ALL RIGHTS RESERVED.
+      <!-- 13. Graphic 3 -->
+      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
+            <div class="card-title">Visual Artwork Asset #03</div>
+            <div class="card-desc">High-contrast branding asset designed for social rollouts and ad sets.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> FULL VIEW
+          </a>
+        </div>
       </div>
-    </section>
 
-  </main>
+      <!-- 14. Graphic 4 -->
+      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
+            <div class="card-title">Visual Artwork Asset #04</div>
+            <div class="card-desc">Custom aesthetic design asset with sharp visual hierarchy.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> FULL VIEW
+          </a>
+        </div>
+      </div>
 
-  <!-- Super-Fast 60FPS Three.js Particle System (Zero Lag) -->
+      <!-- 15. Graphic 5 -->
+      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
+        <div class="viewer ratio-16-9">
+          <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview"></iframe>
+        </div>
+        <div class="card-info">
+          <div>
+            <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
+            <div class="card-title">Visual Artwork Asset #05</div>
+            <div class="card-desc">Sleek poster design combining modern layout principles and brand styling.</div>
+          </div>
+          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="btn-view">
+            <i class="fa-solid fa-expand"></i> FULL VIEW
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Connect Section -->
+  <section id="contact">
+    <div class="section-header">
+      <h2>// INITIATE COLLABORATION</h2>
+      <p>&lt; DIRECT LINES FOR COMMISSIONS &amp; PROJECTS &gt;</p>
+    </div>
+
+    <div class="contact-grid">
+      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="contact-tile" data-tilt data-tilt-max="8">
+        <i class="fa-brands fa-whatsapp"></i>
+        <h4>WHATSAPP</h4>
+        <span>+91 8109780994</span>
+      </a>
+
+      <a href="tel:8109780994" class="contact-tile" data-tilt data-tilt-max="8">
+        <i class="fa-solid fa-phone-volume"></i>
+        <h4>DIRECT LINE</h4>
+        <span>Call or SMS</span>
+      </a>
+
+      <a href="mailto:arcus0994@gmail.com" class="contact-tile" data-tilt data-tilt-max="8">
+        <i class="fa-solid fa-terminal"></i>
+        <h4>EMAIL</h4>
+        <span>arcus0994@gmail.com</span>
+      </a>
+
+      <a href="https://instagram.com/arcu_sx" target="_blank" class="contact-tile" data-tilt data-tilt-max="8">
+        <i class="fa-brands fa-instagram"></i>
+        <h4>INSTAGRAM</h4>
+        <span>@arcu_sx</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>// ARCUS &copy; 2026. 100+ CURATED ASSETS DELIVERED. CRAFTED FOR HIGH IMPACT.</p>
+  </footer>
+
   <script>
-    (function() {
-      const canvas = document.getElementById('bg-canvas');
+    // Three.js 3D Interactive Cyber Particle Background
+    (function init3D() {
+      const canvas = document.getElementById('webgl-bg');
       const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.z = 250;
+      camera.position.z = 240;
 
-      // Lightweight 3D Star/Cyber Particles (Max Performance)
-      const count = 150;
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(count * 3);
+      // 3D Particles
+      const count = 180;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
       for(let i = 0; i < count * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 600;
-        positions[i+1] = (Math.random() - 0.5) * 600;
-        positions[i+2] = (Math.random() - 0.5) * 400;
+        pos[i] = (Math.random() - 0.5) * 650;
+        pos[i+1] = (Math.random() - 0.5) * 650;
+        pos[i+2] = (Math.random() - 0.5) * 450;
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const material = new THREE.PointsMaterial({
-        color: 0xff2222,
-        size: 2.5,
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xef4444,
+        size: 2.8,
         transparent: true,
-        opacity: 0.65
+        opacity: 0.7
       });
-      const points = new THREE.Points(geometry, material);
+      const points = new THREE.Points(geo, mat);
       scene.add(points);
 
-      // Ultra-light Wireframe Geo
-      const wireGeo = new THREE.IcosahedronGeometry(70, 1);
+      // Rotating Wireframe Icosahedron
+      const wireGeo = new THREE.IcosahedronGeometry(75, 1);
       const wireMat = new THREE.MeshBasicMaterial({
-        color: 0xff2222,
+        color: 0xef4444,
         wireframe: true,
         transparent: true,
-        opacity: 0.12
+        opacity: 0.15
       });
       const wireMesh = new THREE.Mesh(wireGeo, wireMat);
       scene.add(wireMesh);
@@ -1173,11 +1329,9 @@
 
       function animate() {
         requestAnimationFrame(animate);
-        wireMesh.rotation.x += 0.0015;
-        wireMesh.rotation.y += 0.002;
-        wireMesh.rotation.x += mouseY * 0.1;
-        wireMesh.rotation.y += mouseX * 0.1;
-        points.rotation.y -= 0.0008;
+        wireMesh.rotation.x += 0.0018 + mouseY * 0.05;
+        wireMesh.rotation.y += 0.0022 + mouseX * 0.05;
+        points.rotation.y -= 0.0006;
         renderer.render(scene, camera);
       }
       animate();
@@ -1188,6 +1342,32 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
     })();
+
+    // Live HUD Timecode simulation
+    setInterval(() => {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const f = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+      document.getElementById('timecode').innerText = `TC ${h}:${m}:${s}:${f}`;
+    }, 100);
+
+    // Filter Logic
+    function applyFilter(cat) {
+      const btns = document.querySelectorAll('.filter-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
   </script>
 
 </body>
