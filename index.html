@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCUS // 3D Visual Direction & Video Engineering Portfolio (2026)</title>
+  <title>ARCUS // 3D Visual Direction & Cinematic Engineering (2026)</title>
 
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Three.js (WebGL 3D Engine) & Vanilla Tilt -->
+  <!-- Three.js (High-Performance WebGL 3D) & Vanilla Tilt -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 
   <style>
     :root {
-      --bg: #050608;
-      --card-bg: rgba(12, 14, 20, 0.78);
-      --card-border: rgba(239, 68, 68, 0.22);
-      --neon-red: #ef4444;
-      --neon-crimson: #dc2626;
-      --neon-purple: #9333ea;
-      --electric-glow: 0 0 25px rgba(239, 68, 68, 0.45);
+      --bg: #040507;
+      --card-bg: rgba(10, 12, 18, 0.82);
+      --card-border: rgba(255, 34, 34, 0.28);
+      --neon-red: #ff2222;
+      --neon-crimson: #d90429;
+      --neon-glow: 0 0 25px rgba(255, 34, 34, 0.6);
       --text: #f8fafc;
-      --text-dim: #94a3b8;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --font-display: 'Orbitron', sans-serif;
+      --font-hero: 'Syne', sans-serif;
       --font-mono: 'Space Mono', monospace;
     }
 
@@ -45,8 +46,34 @@
       position: relative;
     }
 
-    /* 3D WebGL Canvas */
-    #webgl-bg {
+    /* Custom 3D Glowing Cursor */
+    .custom-cursor {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--neon-red);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      box-shadow: 0 0 15px var(--neon-red), 0 0 30px var(--neon-red);
+      transition: transform 0.08s ease-out;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-follower {
+      position: fixed;
+      width: 38px;
+      height: 38px;
+      border: 1.5px solid rgba(255, 34, 34, 0.65);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.18s ease-out;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 3D WebGL Canvas Layer */
+    #canvas3d {
       position: fixed;
       top: 0;
       left: 0;
@@ -54,56 +81,32 @@
       height: 100vh;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.75;
+      opacity: 0.85;
     }
 
-    /* CRT Scanline Overlay */
+    /* Subtle Cinematic Scanlines */
     body::before {
-      content: " ";
-      display: block;
+      content: "";
       position: fixed;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
-      z-index: 999;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      z-index: 998;
       background-size: 100% 4px, 6px 100%;
       pointer-events: none;
-      opacity: 0.55;
+      opacity: 0.6;
     }
 
-    /* Ambient Glows */
-    .glow-red {
-      position: absolute;
-      width: 650px;
-      height: 650px;
-      background: radial-gradient(circle, rgba(239, 68, 68, 0.16) 0%, transparent 65%);
-      top: -100px;
-      left: 10%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .glow-secondary {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(147, 51, 234, 0.12) 0%, transparent 65%);
-      top: 400px;
-      right: 5%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Top HUD Director Bar */
+    /* Top Director HUD Ribbon */
     .hud-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.55rem 6%;
-      background: rgba(5, 6, 8, 0.95);
+      padding: 0.6rem 6%;
+      background: rgba(4, 5, 7, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-dim);
+      font-size: 0.74rem;
+      color: var(--text-muted);
       letter-spacing: 1.5px;
       position: relative;
       z-index: 1001;
@@ -112,7 +115,7 @@
     .rec-indicator {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       color: var(--neon-red);
       font-weight: 700;
     }
@@ -122,24 +125,49 @@
       height: 9px;
       background: var(--neon-red);
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--neon-red);
-      animation: blink 1.2s infinite;
+      box-shadow: 0 0 12px var(--neon-red);
+      animation: pulse 1s infinite alternate;
     }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
+    @keyframes pulse {
+      0% { opacity: 0.2; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.15); }
     }
 
-    /* Navbar */
+    /* Soundwave Visualizer Bars */
+    .visualizer-strip {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 14px;
+    }
+
+    .v-bar {
+      width: 3px;
+      background: var(--neon-red);
+      border-radius: 2px;
+      animation: bounce 0.8s infinite ease-in-out alternate;
+    }
+    .v-bar:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+    .v-bar:nth-child(2) { height: 90%; animation-delay: 0.3s; }
+    .v-bar:nth-child(3) { height: 60%; animation-delay: 0.2s; }
+    .v-bar:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+    .v-bar:nth-child(5) { height: 50%; animation-delay: 0.25s; }
+
+    @keyframes bounce {
+      0% { transform: scaleY(0.3); }
+      100% { transform: scaleY(1); }
+    }
+
+    /* Navigation */
     nav {
       position: sticky;
       top: 0;
-      backdrop-filter: blur(16px);
-      background: rgba(5, 6, 8, 0.88);
+      backdrop-filter: blur(20px);
+      background: rgba(4, 5, 7, 0.88);
       border-bottom: 1px solid var(--card-border);
       z-index: 1000;
-      padding: 1rem 6%;
+      padding: 1.1rem 6%;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -152,36 +180,41 @@
     }
 
     .nav-avatar {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--neon-red);
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 16px rgba(255, 34, 34, 0.6);
+      transition: transform 0.4s ease;
+    }
+
+    .nav-avatar:hover {
+      transform: rotate(15deg) scale(1.1);
     }
 
     .logo-brand {
       font-family: var(--font-display);
       font-weight: 900;
-      font-size: 1.8rem;
+      font-size: 1.85rem;
       letter-spacing: 4px;
-      background: linear-gradient(135deg, #ffffff 0%, #ef4444 60%, #9333ea 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #ff2222 65%, #d90429 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: var(--electric-glow);
+      filter: drop-shadow(0 0 15px rgba(255, 34, 34, 0.4));
     }
 
     .logo-brand sub {
       font-family: var(--font-mono);
-      font-size: 0.6rem;
+      font-size: 0.62rem;
       letter-spacing: 2px;
       color: var(--neon-red);
       -webkit-text-fill-color: var(--neon-red);
-      margin-left: 4px;
+      margin-left: 5px;
     }
 
     .nav-links a {
-      color: var(--text-dim);
+      color: var(--text-muted);
       text-decoration: none;
       margin-left: 2rem;
       font-size: 0.85rem;
@@ -189,19 +222,35 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
       transition: all 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: var(--neon-red);
+      box-shadow: 0 0 8px var(--neon-red);
+      transition: width 0.3s;
     }
 
     .nav-links a:hover {
       color: #fff;
-      text-shadow: 0 0 10px var(--neon-red);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
     }
 
     /* Hero Section */
     .hero {
       position: relative;
-      padding: 5.5rem 6% 4.5rem;
+      padding: 6.5rem 6% 4.5rem;
       text-align: center;
-      max-width: 1050px;
+      max-width: 1100px;
       margin: 0 auto;
       z-index: 1;
       display: flex;
@@ -209,13 +258,26 @@
       align-items: center;
     }
 
-    .hero-avatar-wrap {
+    .hero-avatar-3d-box {
       position: relative;
-      width: 155px;
-      height: 155px;
-      margin-bottom: 2rem;
+      width: 170px;
+      height: 170px;
+      margin-bottom: 2.2rem;
       transform-style: preserve-3d;
       will-change: transform;
+    }
+
+    .hero-avatar-ring {
+      position: absolute;
+      inset: -12px;
+      border: 2px dashed rgba(255, 34, 34, 0.6);
+      border-radius: 50%;
+      animation: spinRing 16s linear infinite;
+    }
+
+    @keyframes spinRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .hero-avatar {
@@ -224,74 +286,75 @@
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid var(--neon-red);
-      box-shadow: 0 0 35px rgba(239, 68, 68, 0.6);
-      filter: contrast(1.08);
+      box-shadow: 0 0 45px rgba(255, 34, 34, 0.7);
       display: block;
+      filter: contrast(1.1);
     }
 
-    .hud-corner-tl, .hud-corner-br {
+    .hud-corner {
       position: absolute;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border: 2px solid var(--neon-red);
       pointer-events: none;
     }
-    .hud-corner-tl { top: -8px; left: -8px; border-right: none; border-bottom: none; }
-    .hud-corner-br { bottom: -8px; right: -8px; border-left: none; border-top: none; }
+    .hud-corner-tl { top: -12px; left: -12px; border-right: none; border-bottom: none; }
+    .hud-corner-br { bottom: -12px; right: -12px; border-left: none; border-top: none; }
 
-    .hero-badge {
+    .hero-pill {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 22px;
-      border-radius: 4px;
-      background: rgba(239, 68, 68, 0.1);
-      border-left: 3px solid var(--neon-red);
-      border-right: 3px solid var(--neon-purple);
-      color: #fca5a5;
+      padding: 8px 24px;
+      border-radius: 50px;
+      background: rgba(255, 34, 34, 0.08);
+      border: 1px solid var(--card-border);
+      color: #ff9999;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 0 20px rgba(255, 34, 34, 0.2);
     }
 
     .hero h1 {
-      font-family: var(--font-display);
-      font-size: clamp(2.8rem, 6vw, 4.4rem);
+      font-family: var(--font-hero);
+      font-size: clamp(3rem, 7.5vw, 5.8rem);
       font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: 2px;
-      margin-bottom: 1.4rem;
+      line-height: 0.95;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.6rem;
       text-transform: uppercase;
     }
 
-    .hero h1 .neon-text {
-      background: linear-gradient(135deg, #ffffff 15%, #ef4444 65%, #dc2626 100%);
+    .hero h1 .text-glow {
+      background: linear-gradient(135deg, #ffffff 10%, #ff2222 65%, #d90429 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.6));
+      filter: drop-shadow(0 0 35px rgba(255, 34, 34, 0.7));
     }
 
     .hero p {
-      font-size: 1.12rem;
-      color: var(--text-dim);
-      margin-bottom: 2.4rem;
-      max-width: 760px;
-      line-height: 1.7;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2.8rem;
+      max-width: 800px;
+      line-height: 1.8;
+      font-weight: 300;
     }
 
     .cta-group {
       display: flex;
-      gap: 1.2rem;
+      gap: 1.4rem;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .btn {
-      padding: 0.95rem 2.2rem;
+      padding: 1.05rem 2.4rem;
       font-family: var(--font-mono);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -299,249 +362,276 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-      transition: all 0.3s ease;
+      transition: all 0.35s ease;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
     }
 
     .btn-neon {
       background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
       color: #fff;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
-      border: none;
+      box-shadow: 0 0 30px rgba(255, 34, 34, 0.6);
+      border: 1px solid var(--neon-red);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
     }
 
     .btn-neon:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 40px rgba(239, 68, 68, 0.85);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 50px rgba(255, 34, 34, 0.9);
     }
 
     .btn-outline {
-      background: rgba(12, 14, 20, 0.85);
-      color: var(--text);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(10, 12, 18, 0.85);
+      color: #fff;
+      border: 1px solid var(--card-border);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
     }
 
     .btn-outline:hover {
       border-color: #fff;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+      transform: translateY(-3px);
     }
 
-    /* Metric Strip (2+ Years & 100+ Assets) */
-    .metric-strip {
-      margin-top: 3.5rem;
+    /* 3D Floating Metric Stats */
+    .metric-grid {
+      margin-top: 4.5rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.4rem;
       width: 100%;
-      max-width: 950px;
+      max-width: 1050px;
     }
 
-    .metric-box {
-      background: rgba(12, 14, 20, 0.8);
+    .metric-card {
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
-      padding: 1.4rem;
+      padding: 1.8rem 1.4rem;
       text-align: center;
-      border-radius: 6px;
-      will-change: transform;
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
       transform-style: preserve-3d;
+      will-change: transform;
+      transition: border-color 0.3s;
     }
 
-    .metric-num {
-      font-family: var(--font-display);
-      font-size: 2.6rem;
+    .metric-card:hover {
+      border-color: var(--neon-red);
+    }
+
+    .metric-value {
+      font-family: var(--font-hero);
+      font-size: 3.2rem;
       font-weight: 900;
       color: #fff;
-      text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(255, 34, 34, 0.5);
+      transform: translateZ(25px);
     }
 
-    .metric-label {
+    .metric-title {
       font-family: var(--font-mono);
-      font-size: 0.76rem;
-      color: var(--text-dim);
+      font-size: 0.78rem;
+      color: var(--text-muted);
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 8px;
+      transform: translateZ(15px);
     }
 
-    /* Section Global Styles */
+    /* Global Section Framing */
     section {
-      padding: 5rem 6%;
-      max-width: 1300px;
+      padding: 5.5rem 6%;
+      max-width: 1320px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
     }
 
-    .section-header {
+    .section-title-wrap {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 3.5rem;
     }
 
-    .section-header h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 2.6rem);
-      letter-spacing: 2px;
-      margin-bottom: 0.5rem;
+    .section-title-wrap h2 {
+      font-family: var(--font-hero);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -1px;
       text-transform: uppercase;
+      margin-bottom: 0.5rem;
     }
 
-    .section-header p {
+    .section-title-wrap p {
       font-family: var(--font-mono);
       font-size: 0.85rem;
       color: var(--neon-red);
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
-    /* Software Suite with 3D Tilt */
-    .software-grid {
+    /* Software Arsenal with 3D Depth */
+    .apps-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
       gap: 1.6rem;
     }
 
-    .app-card {
+    .app-tile {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 1.8rem;
+      border-radius: 10px;
+      padding: 2.2rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      will-change: transform;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
       transform-style: preserve-3d;
+      will-change: transform;
       transition: border-color 0.3s;
     }
 
-    .app-card:hover {
+    .app-tile:hover {
       border-color: var(--neon-red);
     }
 
-    .app-header {
+    .app-header-box {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.4rem;
+      transform: translateZ(25px);
     }
 
-    .app-badge {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
+    .app-logo-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
       font-weight: 900;
-      font-size: 1.25rem;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      font-size: 1.35rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
     }
 
-    .badge-pr { background: #00005b; color: #9999ff; border: 1px solid #9999ff; }
-    .badge-ae { background: #00005b; color: #d291ff; border: 1px solid #d291ff; }
-    .badge-dv { background: #1a1a24; color: #ff5555; border: 1px solid #ff5555; }
-    .badge-ps { background: #001e36; color: #31a8ff; border: 1px solid #31a8ff; }
-    .badge-ai { background: #330000; color: #ff9a00; border: 1px solid #ff9a00; }
-    .badge-figma { background: #1a1a24; color: #0acf83; border: 1px solid #0acf83; }
+    .badge-pr { background: #00005b; color: #9999ff; border: 1.5px solid #9999ff; }
+    .badge-ae { background: #00005b; color: #d291ff; border: 1.5px solid #d291ff; }
+    .badge-dv { background: #181922; color: #ff5555; border: 1.5px solid #ff5555; }
+    .badge-ps { background: #001e36; color: #31a8ff; border: 1.5px solid #31a8ff; }
+    .badge-ai { background: #330000; color: #ff9a00; border: 1.5px solid #ff9a00; }
+    .badge-figma { background: #16171d; color: #0acf83; border: 1.5px solid #0acf83; }
 
     .app-tag {
       font-family: var(--font-mono);
       font-size: 0.68rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       border: 1px solid var(--card-border);
-      padding: 4px 8px;
+      padding: 5px 10px;
       letter-spacing: 1px;
       text-transform: uppercase;
+      border-radius: 4px;
     }
 
-    .app-title {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
+    .app-name {
+      font-family: var(--font-hero);
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
       color: #fff;
+      transform: translateZ(20px);
     }
 
     .app-desc {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      line-height: 1.6;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      transform: translateZ(10px);
     }
 
-    /* Client Reviews Grid */
-    .reviews-grid {
+    /* Client Reviews 3D Cards */
+    .reviews-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-      gap: 1.6rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.8rem;
     }
 
-    .review-tile {
+    .review-3d-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 2.2rem 1.8rem;
+      border-radius: 10px;
+      padding: 2.4rem 2rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      will-change: transform;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
       transform-style: preserve-3d;
+      will-change: transform;
       transition: border-color 0.3s;
     }
 
-    .review-tile:hover {
+    .review-3d-card:hover {
       border-color: var(--neon-red);
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+      box-shadow: 0 0 35px rgba(255, 34, 34, 0.25);
     }
 
-    .stars {
+    .stars-strip {
       color: #f59e0b;
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
       display: flex;
-      gap: 4px;
+      gap: 5px;
+      transform: translateZ(20px);
     }
 
-    .review-quote {
-      font-size: 0.92rem;
+    .review-text {
+      font-size: 0.96rem;
       color: #cbd5e1;
-      line-height: 1.7;
-      margin-bottom: 1.6rem;
+      line-height: 1.8;
+      margin-bottom: 1.8rem;
       font-style: italic;
+      transform: translateZ(15px);
     }
 
-    .client-meta {
+    .reviewer-meta {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       border-top: 1px solid var(--card-border);
-      padding-top: 1.2rem;
+      padding-top: 1.4rem;
+      transform: translateZ(20px);
     }
 
-    .client-avatar {
-      width: 40px;
-      height: 40px;
+    .reviewer-pfp {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--neon-red);
+      background: rgba(255, 34, 34, 0.15);
+      border: 1.5px solid var(--neon-red);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
       font-weight: 800;
       color: var(--neon-red);
+      box-shadow: 0 0 12px rgba(255, 34, 34, 0.4);
     }
 
-    .client-name {
-      font-family: var(--font-display);
-      font-size: 0.95rem;
-      font-weight: 700;
+    .reviewer-name {
+      font-family: var(--font-hero);
+      font-size: 1.05rem;
+      font-weight: 800;
       color: #fff;
     }
 
-    .client-sub {
+    .reviewer-role {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       color: var(--text-dim);
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -551,19 +641,19 @@
     .filter-wrap {
       display: flex;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.8rem;
       flex-wrap: wrap;
-      margin-bottom: 3rem;
+      margin-bottom: 3.5rem;
     }
 
     .filter-btn {
-      padding: 0.65rem 1.4rem;
-      background: rgba(15, 18, 28, 0.75);
+      padding: 0.75rem 1.6rem;
+      background: rgba(15, 18, 28, 0.8);
       border: 1px solid var(--card-border);
       font-family: var(--font-mono);
       font-size: 0.78rem;
-      color: var(--text-dim);
-      letter-spacing: 1px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
       cursor: pointer;
       text-transform: uppercase;
       transition: all 0.3s ease;
@@ -574,36 +664,36 @@
       background: linear-gradient(135deg, var(--neon-red), var(--neon-crimson));
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
+      box-shadow: 0 0 30px rgba(255, 34, 34, 0.65);
     }
 
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 2rem;
     }
 
-    .card {
+    .project-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       position: relative;
       transition: all 0.35s ease;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      will-change: transform;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
       transform-style: preserve-3d;
+      will-change: transform;
     }
 
-    .card:hover {
+    .project-card:hover {
       border-color: var(--neon-red);
-      box-shadow: 0 0 35px rgba(239, 68, 68, 0.35);
-      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(255, 34, 34, 0.4);
+      transform: translateY(-6px);
     }
 
-    .viewer {
+    .media-window {
       position: relative;
       width: 100%;
       background: #000;
@@ -613,24 +703,25 @@
     .ratio-16-9 { padding-top: 56.25%; }
     .ratio-9-16 { padding-top: 135%; }
 
-    .viewer iframe {
+    .media-window iframe {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
       border: none;
     }
 
-    .card-info {
-      padding: 1.4rem;
+    .card-content {
+      padding: 1.6rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       flex-grow: 1;
+      transform: translateZ(20px);
     }
 
     .tag-category {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--neon-red);
@@ -641,31 +732,31 @@
     }
 
     .card-title {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 0.5rem;
+      font-family: var(--font-hero);
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.6rem;
       color: #fff;
     }
 
     .card-desc {
-      font-size: 0.86rem;
-      color: var(--text-dim);
-      margin-bottom: 1.3rem;
-      line-height: 1.6;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.4rem;
+      line-height: 1.7;
     }
 
-    .btn-view {
+    .btn-stream {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 0.65rem 1.1rem;
+      padding: 0.75rem 1.3rem;
       font-family: var(--font-mono);
       font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
@@ -674,93 +765,106 @@
       transition: all 0.3s;
     }
 
-    .btn-view:hover {
+    .btn-stream:hover {
       background: var(--neon-red);
       border-color: var(--neon-red);
-      box-shadow: 0 0 18px var(--neon-red);
+      box-shadow: 0 0 20px var(--neon-red);
     }
 
-    /* Contact Grid */
+    /* Contact Section */
     .contact-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 1.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.6rem;
     }
 
-    .contact-tile {
+    .contact-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      padding: 2.2rem 1.4rem;
+      padding: 2.4rem 1.6rem;
       text-align: center;
       text-decoration: none;
       color: var(--text);
-      border-radius: 8px;
+      border-radius: 10px;
       transition: all 0.3s;
-      will-change: transform;
       transform-style: preserve-3d;
+      will-change: transform;
     }
 
-    .contact-tile:hover {
+    .contact-card:hover {
       border-color: var(--neon-red);
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.45);
-      transform: translateY(-4px);
+      box-shadow: 0 0 35px rgba(255, 34, 34, 0.5);
+      transform: translateY(-5px);
     }
 
-    .contact-tile i {
-      font-size: 2.2rem;
+    .contact-card i {
+      font-size: 2.4rem;
       color: var(--neon-red);
-      filter: drop-shadow(0 0 12px var(--neon-red));
-      margin-bottom: 0.9rem;
+      filter: drop-shadow(0 0 15px var(--neon-red));
+      margin-bottom: 1rem;
+      transform: translateZ(25px);
     }
 
-    .contact-tile h4 {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
+    .contact-card h4 {
+      font-family: var(--font-hero);
+      font-size: 1.2rem;
+      font-weight: 800;
       letter-spacing: 1px;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
+      transform: translateZ(20px);
     }
 
-    .contact-tile span {
+    .contact-card span {
       font-family: var(--font-mono);
       font-size: 0.82rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
+      transform: translateZ(15px);
     }
 
     footer {
       border-top: 1px solid var(--card-border);
-      padding: 2.5rem 6%;
+      padding: 2.8rem 6%;
       text-align: center;
       font-family: var(--font-mono);
       font-size: 0.82rem;
       color: var(--text-dim);
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       position: relative;
       z-index: 1;
     }
 
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.4rem; }
+      .hero h1 { font-size: 2.6rem; }
       .nav-links { display: none; }
       .gallery-grid { grid-template-columns: 1fr; }
+      .custom-cursor, .cursor-follower { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 3D Three.js WebGL Interactive Canvas -->
-  <canvas id="webgl-bg"></canvas>
+  <!-- Custom Neon Cyber Cursor -->
+  <div class="custom-cursor" id="cursor"></div>
+  <div class="cursor-follower" id="follower"></div>
 
-  <!-- Top Director HUD Bar -->
+  <!-- 3D WebGL Three.js Particle & Floating Geometry Canvas -->
+  <canvas id="canvas3d"></canvas>
+
+  <!-- Top Director HUD Ribbon -->
   <div class="hud-bar">
     <div class="rec-indicator">
       <div class="rec-dot"></div> [REC] 4K PRO-RES 60FPS
     </div>
+    <div class="visualizer-strip">
+      <div class="v-bar"></div>
+      <div class="v-bar"></div>
+      <div class="v-bar"></div>
+      <div class="v-bar"></div>
+      <div class="v-bar"></div>
+    </div>
     <div id="timecode">TC 00:02:14:28</div>
-    <div>EXP: 2+ YEARS // 100+ CURATED ASSETS</div>
+    <div>EXP: 2+ YEARS // 100+ CURATED DELIVERIES</div>
   </div>
-
-  <div class="glow-red"></div>
-  <div class="glow-secondary"></div>
 
   <!-- Navbar -->
   <nav>
@@ -771,192 +875,194 @@
       <div class="logo-brand">ARCUS<sub>STUDIO</sub></div>
     </div>
     <div class="nav-links">
-      <a href="#productions">// WORK VAULT</a>
-      <a href="#software">// ARSENAL</a>
-      <a href="#reviews">// REVIEWS</a>
-      <a href="#contact">// INITIATE</a>
+      <a href="#productions">// PRODUCTION VAULT</a>
+      <a href="#arsenal">// 3D ARSENAL</a>
+      <a href="#reviews">// TESTIMONIALS</a>
+      <a href="#contact">// INITIATE CHAT</a>
     </div>
   </nav>
 
   <!-- Hero Section -->
   <header class="hero">
-    <div class="hero-avatar-wrap" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.25">
-      <div class="hud-corner-tl"></div>
+    <div class="hero-avatar-3d-box" data-tilt data-tilt-max="20" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
+      <div class="hud-corner hud-corner-tl"></div>
+      <div class="hero-avatar-ring"></div>
       <img src="https://drive.google.com/thumbnail?id=1a5KBR6h-6SKxLUDiDOgAbyUbaJfel92k&sz=w1000" 
            onerror="this.src='./profile.png';" 
            alt="ARCUS Creator" class="hero-avatar">
-      <div class="hud-corner-br"></div>
+      <div class="hud-corner hud-corner-br"></div>
     </div>
 
-    <div class="hero-badge">
+    <div class="hero-pill">
       <i class="fa-solid fa-bolt"></i> 2+ YEARS PRODUCTION MASTERY
     </div>
     <h1>
-      CRAFTING <span class="neon-text">CINEMATIC REALITY</span>
+      CRAFTING <br><span class="text-glow">CINEMATIC REALITY</span>
     </h1>
     <p>
-      Brand identity &amp; cutting-edge video editing. Specializing in high-retention social reels, commercial storytelling, surgical pacing, and custom graphics tailored to dominate the digital screen.
+      Brand identity &amp; high-retention video engineering. Specializing in viral 9:16 social reels, commercial storytelling trailers, surgical pacing, and custom visual graphics tailored to dominate modern digital attention.
     </p>
+
     <div class="cta-group">
-      <a href="#productions" class="btn btn-neon"><i class="fa-solid fa-play"></i> ACCESS SHOWCASE</a>
+      <a href="#productions" class="btn btn-neon"><i class="fa-solid fa-play"></i> EXPLORE VAULT</a>
       <a href="https://wa.me/918109780994?text=Hey%20ARCUS,%20let's%20collaborate%20on%20a%20project!" target="_blank" class="btn btn-outline"><i class="fa-brands fa-whatsapp"></i> INITIATE CHAT</a>
     </div>
 
-    <!-- Live Metric Strip -->
-    <div class="metric-strip">
-      <div class="metric-box" data-tilt data-tilt-max="8">
-        <div class="metric-num">02+</div>
-        <div class="metric-label">Years of Experience</div>
+    <!-- 3D Metric Badges -->
+    <div class="metric-grid">
+      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
+        <div class="metric-value">02+</div>
+        <div class="metric-title">Years of Editing Mastery</div>
       </div>
-      <div class="metric-box" data-tilt data-tilt-max="8">
-        <div class="metric-num">100+</div>
-        <div class="metric-label">Curated Deliverables</div>
+      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
+        <div class="metric-value">100+</div>
+        <div class="metric-title">Curated Assets Delivered</div>
       </div>
-      <div class="metric-box" data-tilt data-tilt-max="8">
-        <div class="metric-num">100%</div>
-        <div class="metric-label">Custom Sound &amp; Color</div>
+      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
+        <div class="metric-value">100%</div>
+        <div class="metric-title">Custom Sound &amp; Grade</div>
       </div>
-      <div class="metric-box" data-tilt data-tilt-max="8">
-        <div class="metric-num">24H</div>
-        <div class="metric-label">Rapid Turnaround</div>
+      <div class="metric-card" data-tilt data-tilt-max="12" data-tilt-speed="300">
+        <div class="metric-value">24H</div>
+        <div class="metric-title">Rapid Production Turnaround</div>
       </div>
     </div>
   </header>
 
   <!-- Software Arsenal (Apps & Badges) -->
-  <section id="software">
-    <div class="section-header">
+  <section id="arsenal">
+    <div class="section-title-wrap">
       <h2>// SOFTWARE ARSENAL</h2>
       <p>&lt; PRODUCTION ENGINE &amp; DESIGN STACK &gt;</p>
     </div>
 
-    <div class="software-grid">
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-pr">Pr</div>
+    <div class="apps-grid">
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-pr">Pr</div>
           <div class="app-tag">TIMELINE ENGINE</div>
         </div>
         <div>
-          <div class="app-title">Adobe Premiere Pro</div>
-          <div class="app-desc">Pacing, narrative assembly, dialogue balancing, and surgical cuts.</div>
+          <div class="app-name">Adobe Premiere Pro</div>
+          <div class="app-desc">Rhythm, dialogue frequency leveling, multi-cam assembly, and surgical narrative cuts.</div>
         </div>
       </div>
 
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-ae">Ae</div>
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-ae">Ae</div>
           <div class="app-tag">MOTION SUITE</div>
         </div>
         <div>
-          <div class="app-title">Adobe After Effects</div>
-          <div class="app-desc">Kinetic typography, screen tracking, visual transitions, and VFX.</div>
+          <div class="app-name">Adobe After Effects</div>
+          <div class="app-desc">Kinetic typography, screen motion tracking, visual transitions, SFX, and VFX synthesis.</div>
         </div>
       </div>
 
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-dv">Dv</div>
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-dv">Dv</div>
           <div class="app-tag">COLOR SUITE</div>
         </div>
         <div>
-          <div class="app-title">DaVinci Resolve</div>
-          <div class="app-desc">Node-based film grading, LUT emulation, and cinematic color finish.</div>
+          <div class="app-name">DaVinci Resolve</div>
+          <div class="app-desc">Node-based film emulation, precise skin-tone grading, and master HDR exports.</div>
         </div>
       </div>
 
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-ps">Ps</div>
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-ps">Ps</div>
           <div class="app-tag">VISUAL DESIGN</div>
         </div>
         <div>
-          <div class="app-title">Adobe Photoshop</div>
-          <div class="app-desc">High-CTR thumbnails, depth isolation, and custom poster art.</div>
+          <div class="app-name">Adobe Photoshop</div>
+          <div class="app-desc">High-CTR clickable thumbnails, depth extraction, poster design, and digital textures.</div>
         </div>
       </div>
 
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-ai">Ai</div>
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-ai">Ai</div>
           <div class="app-tag">VECTOR SUITE</div>
         </div>
         <div>
-          <div class="app-title">Adobe Illustrator</div>
-          <div class="app-desc">Vector brand identities, logo typography, and clean graphic layouts.</div>
+          <div class="app-name">Adobe Illustrator</div>
+          <div class="app-desc">Vector brand marks, geometric logos, custom typography, and editorial layouts.</div>
         </div>
       </div>
 
-      <div class="app-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
-        <div class="app-header">
-          <div class="app-badge badge-figma">Fg</div>
+      <div class="app-tile" data-tilt data-tilt-max="14" data-tilt-speed="300">
+        <div class="app-header-box">
+          <div class="app-logo-badge badge-figma">Fg</div>
           <div class="app-tag">UI &amp; AI STACK</div>
         </div>
         <div>
-          <div class="app-title">Figma &amp; AI Tools</div>
-          <div class="app-desc">Interface mockups, generative frame expansions, and audio isolation.</div>
+          <div class="app-name">Figma &amp; AI Neural</div>
+          <div class="app-desc">Product mockups, neural audio noise isolation, frame expansions, and storyboard grids.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Client Reviews Section -->
+  <!-- Client Reviews 3D Section -->
   <section id="reviews">
-    <div class="section-header">
-      <h2>// CLIENT TESTIMONIALS</h2>
-      <p>&lt; 100+ HIGH-IMPACT DELIVERIES FOR CREATORS &amp; BRANDS &gt;</p>
+    <div class="section-title-wrap">
+      <h2>// CLIENT APPRAISALS</h2>
+      <p>&lt; 100+ DELIVERIES WITH 100% SATISFACTION &gt;</p>
     </div>
 
-    <div class="reviews-grid">
-      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+    <div class="reviews-container">
+      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
         <div>
-          <div class="stars">
+          <div class="stars-strip">
             <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           </div>
-          <p class="review-quote">
-            "ARCUS completely leveled up our product trailer! The motion tracking and surgical cut pacing kept viewers hooked from start to finish. Highly recommended for commercial edits."
+          <p class="review-text">
+            "ARCUS completely leveled up our product trailer! The motion tracking and surgical cut pacing kept viewers hooked from start to finish. Easily one of the sharpest editors in the game."
           </p>
         </div>
-        <div class="client-meta">
-          <div class="client-avatar">AS</div>
+        <div class="reviewer-meta">
+          <div class="reviewer-pfp">AS</div>
           <div>
-            <div class="client-name">Aman Sharma</div>
-            <div class="client-sub">Founder, Tech App Studio</div>
+            <div class="reviewer-name">Aman Sharma</div>
+            <div class="reviewer-role">Founder, Tech App Studio</div>
           </div>
         </div>
       </div>
 
-      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
         <div>
-          <div class="stars">
+          <div class="stars-strip">
             <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           </div>
-          <p class="review-quote">
-            "The retention on our Instagram Reels jumped significantly after ARCUS took over the editing. His beat syncing and kinetic typography are on another level."
+          <p class="review-text">
+            "The retention on our Instagram Reels jumped significantly after ARCUS took over the editing. His beat-syncing and kinetic typography are on another level."
           </p>
         </div>
-        <div class="client-meta">
-          <div class="client-avatar">RK</div>
+        <div class="reviewer-meta">
+          <div class="reviewer-pfp">RK</div>
           <div>
-            <div class="client-name">Rohan Kapoor</div>
-            <div class="client-sub">Digital Content Creator</div>
+            <div class="reviewer-name">Rohan Kapoor</div>
+            <div class="reviewer-role">Digital Content Creator</div>
           </div>
         </div>
       </div>
 
-      <div class="review-tile" data-tilt data-tilt-max="8" data-tilt-speed="300">
+      <div class="review-3d-card" data-tilt data-tilt-max="10" data-tilt-speed="300">
         <div>
-          <div class="stars">
+          <div class="stars-strip">
             <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           </div>
-          <p class="review-quote">
-            "Our healthcare and luxury hotel videos looked incredibly cinematic. The subtle color grading and professional audio score gave our brand a premium international feel."
+          <p class="review-text">
+            "Our healthcare documentary and luxury hotel commercial looked pristine. The subtle color grading and professional audio score gave our brand a world-class international feel."
           </p>
         </div>
-        <div class="client-meta">
-          <div class="client-avatar">VN</div>
+        <div class="reviewer-meta">
+          <div class="reviewer-pfp">VN</div>
           <div>
-            <div class="client-name">Vikram Nair</div>
-            <div class="client-sub">Hospitality Brand Lead</div>
+            <div class="reviewer-name">Vikram Nair</div>
+            <div class="reviewer-role">Hospitality Marketing Lead</div>
           </div>
         </div>
       </div>
@@ -965,9 +1071,9 @@
 
   <!-- Production Vault (15 Assets) -->
   <section id="productions">
-    <div class="section-header">
+    <div class="section-title-wrap">
       <h2>// PRODUCTION VAULT</h2>
-      <p>&lt; 100+ CURATED ASSETS DELIVERED // EXPLORE FLAGSHIP WORKS &gt;</p>
+      <p>&lt; 100+ CURATED DELIVERIES // EXPLORE FLAGSHIP WORKS &gt;</p>
     </div>
 
     <!-- Interactive Filter Tabs -->
@@ -983,255 +1089,255 @@
     <div class="gallery-grid">
 
       <!-- 1. App Launching Video -->
-      <div class="card" data-cat="commercial" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="commercial" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-rocket"></i> Commercial Cut</div>
             <div class="card-title">App Launching Showcase</div>
             <div class="card-desc">High-tempo product trailer featuring motion mockups, screen tracking, and punchy transitions.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1eKSZQ8tnRcZXsrOkVeWCu-z8TqnpUx10/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 2. Reel 1 -->
-      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-9-16">
+      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-9-16">
           <iframe src="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
             <div class="card-title">Viral Reel Edit #01</div>
             <div class="card-desc">Retention-focused visual hook with beat-synced transitions and dynamic frame re-scaling.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1oOJzXZwEQFfs__o18SCHadW_hm39cfb3/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM REEL
           </a>
         </div>
       </div>
 
       <!-- 3. Reel 2 -->
-      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-9-16">
+      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-9-16">
           <iframe src="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
             <div class="card-title">Viral Reel Edit #02</div>
             <div class="card-desc">Fast narrative pacing with stylized kinetic subtitle animations and immersive SFX.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1oUtrZ-EXy_ucpVvGRBS37v2c7nAZ57Wz/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM REEL
           </a>
         </div>
       </div>
 
       <!-- 4. Reel 3 -->
-      <div class="card" data-cat="reels" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-9-16">
+      <div class="project-card" data-cat="reels" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-9-16">
           <iframe src="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-brands fa-instagram"></i> 9:16 Social Cut</div>
             <div class="card-title">Viral Reel Edit #03</div>
             <div class="card-desc">Cinematic color grading, aggressive drop-in zooms, and hook framing engineered for views.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1WuX2Mh-O0HiNNOT7i6DblCOL1CbxcgQi/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM REEL
           </a>
         </div>
       </div>
 
       <!-- 5. Talking Head 1 -->
-      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
             <div class="card-title">Talking Head Master #01</div>
             <div class="card-desc">Seamless jump-cut elimination, clean dialogue leveling, and contextual motion graphics.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1ZC15ZNqKKL5FTlaltFzAvgNAi7FAfDv-/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 6. Talking Head 2 -->
-      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
             <div class="card-title">Talking Head Master #02</div>
             <div class="card-desc">Multi-angle B-roll intercuts, retention charts, and clear sound mastering.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1DV3bWXI-xklmQA8kKMLqixt9Du1yjCcO/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 7. Talking Head 3 -->
-      <div class="card" data-cat="talking-head" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="talking-head" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-microphone-lines"></i> Creator Master</div>
             <div class="card-title">Talking Head Master #03</div>
             <div class="card-desc">Authority-building narrative cut with dynamic zoom accents and screen overlays.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1_TiPMxS2rJmyLYUNuc98omo-T3hieZ-q/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 8. Hospital 1 -->
-      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
             <div class="card-title">Hospital Documentary #01</div>
-            <div class="card-desc">Professional corporate video highlighting facilities, clean visual grading, and doctor profiles.</div>
+            <div class="card-desc">Professional corporate video highlighting surgical facilities, clean visual grading, and doctor profiles.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1wVG7Di2Z09HZF5bmmZuaHaY67cuLp6G5/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 9. Hospital 2 -->
-      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-hospital"></i> Healthcare Production</div>
             <div class="card-title">Hospital Documentary #02</div>
             <div class="card-desc">Compassionate patient storytelling with subtle audio score and crisp corporate branding.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1og7wOSMDX-H3RfHGPKOjExhxg29x5YSz/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 10. Hotel -->
-      <div class="card" data-cat="hospital-hotel" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="hospital-hotel" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-hotel"></i> Hospitality Commercial</div>
             <div class="card-title">Luxury Hotel Experience</div>
             <div class="card-desc">Warm aesthetic color grade, fluid camera movements, and atmospheric spatial showcase.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="btn-view">
-            <i class="fa-solid fa-expand"></i> OPEN STREAM
+          <a href="https://drive.google.com/file/d/1Rx9el5NWIRX5obwEWxQNVaey2QiTxGh-/view" target="_blank" class="btn-stream">
+            <i class="fa-solid fa-expand"></i> STREAM VIDEO
           </a>
         </div>
       </div>
 
       <!-- 11. Graphic 1 -->
-      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
             <div class="card-title">Visual Artwork Asset #01</div>
             <div class="card-desc">Stylized branding composition with custom textures and typographic balance.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="btn-view">
+          <a href="https://drive.google.com/file/d/1lb5GoncIUcAdK8LqzYMnJMWugB1DOS81/view" target="_blank" class="btn-stream">
             <i class="fa-solid fa-expand"></i> FULL VIEW
           </a>
         </div>
       </div>
 
       <!-- 12. Graphic 2 -->
-      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
             <div class="card-title">Visual Artwork Asset #02</div>
             <div class="card-desc">Striking marketing creative tailored for digital conversion and engagement.</div>
           </div>
-          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="btn-view">
+          <a href="https://drive.google.com/file/d/154fjE0jqEwYwuTGaQWFoPnyzr5NZ9AhR/view" target="_blank" class="btn-stream">
             <i class="fa-solid fa-expand"></i> FULL VIEW
           </a>
         </div>
       </div>
 
       <!-- 13. Graphic 3 -->
-      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
             <div class="card-title">Visual Artwork Asset #03</div>
             <div class="card-desc">High-contrast branding asset designed for social rollouts and ad sets.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="btn-view">
+          <a href="https://drive.google.com/file/d/1MPL4tkWy4OTSoeyrtLSHsVFhjBOdijeM/view" target="_blank" class="btn-stream">
             <i class="fa-solid fa-expand"></i> FULL VIEW
           </a>
         </div>
       </div>
 
       <!-- 14. Graphic 4 -->
-      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
             <div class="card-title">Visual Artwork Asset #04</div>
             <div class="card-desc">Custom aesthetic design asset with sharp visual hierarchy.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="btn-view">
+          <a href="https://drive.google.com/file/d/1Wj-jM4iNMSJLB89SCJKhBBwDfrrYyzKk/view" target="_blank" class="btn-stream">
             <i class="fa-solid fa-expand"></i> FULL VIEW
           </a>
         </div>
       </div>
 
       <!-- 15. Graphic 5 -->
-      <div class="card" data-cat="graphics" data-tilt data-tilt-max="5">
-        <div class="viewer ratio-16-9">
+      <div class="project-card" data-cat="graphics" data-tilt data-tilt-max="8">
+        <div class="media-window ratio-16-9">
           <iframe src="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/preview"></iframe>
         </div>
-        <div class="card-info">
+        <div class="card-content">
           <div>
             <div class="tag-category"><i class="fa-solid fa-palette"></i> Vector &amp; Graphics</div>
             <div class="card-title">Visual Artwork Asset #05</div>
             <div class="card-desc">Sleek poster design combining modern layout principles and brand styling.</div>
           </div>
-          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="btn-view">
+          <a href="https://drive.google.com/file/d/1MozDrCkSBS0cTa4PQ870Rd1WZRLn1zf3/view" target="_blank" class="btn-stream">
             <i class="fa-solid fa-expand"></i> FULL VIEW
           </a>
         </div>
@@ -1242,31 +1348,31 @@
 
   <!-- Connect Section -->
   <section id="contact">
-    <div class="section-header">
+    <div class="section-title-wrap">
       <h2>// INITIATE COLLABORATION</h2>
       <p>&lt; DIRECT LINES FOR COMMISSIONS &amp; PROJECTS &gt;</p>
     </div>
 
     <div class="contact-grid">
-      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="contact-tile" data-tilt data-tilt-max="8">
+      <a href="https://wa.me/918109780994?text=Hello%20ARCUS,%20I%20have%20a%20project%20for%20you!" target="_blank" class="contact-card" data-tilt data-tilt-max="10">
         <i class="fa-brands fa-whatsapp"></i>
         <h4>WHATSAPP</h4>
         <span>+91 8109780994</span>
       </a>
 
-      <a href="tel:8109780994" class="contact-tile" data-tilt data-tilt-max="8">
+      <a href="tel:8109780994" class="contact-card" data-tilt data-tilt-max="10">
         <i class="fa-solid fa-phone-volume"></i>
         <h4>DIRECT LINE</h4>
         <span>Call or SMS</span>
       </a>
 
-      <a href="mailto:arcus0994@gmail.com" class="contact-tile" data-tilt data-tilt-max="8">
+      <a href="mailto:arcus0994@gmail.com" class="contact-card" data-tilt data-tilt-max="10">
         <i class="fa-solid fa-terminal"></i>
         <h4>EMAIL</h4>
         <span>arcus0994@gmail.com</span>
       </a>
 
-      <a href="https://instagram.com/arcu_sx" target="_blank" class="contact-tile" data-tilt data-tilt-max="8">
+      <a href="https://instagram.com/arcu_sx" target="_blank" class="contact-card" data-tilt data-tilt-max="10">
         <i class="fa-brands fa-instagram"></i>
         <h4>INSTAGRAM</h4>
         <span>@arcu_sx</span>
@@ -1280,9 +1386,9 @@
   </footer>
 
   <script>
-    // Three.js 3D Interactive Cyber Particle Background
-    (function init3D() {
-      const canvas = document.getElementById('webgl-bg');
+    // 3D Three.js Interactive WebGL Background (Torus Knot + Particle Field)
+    (function init3DWorld() {
+      const canvas = document.getElementById('canvas3d');
       const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1291,7 +1397,7 @@
       const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 240;
 
-      // 3D Particles
+      // Particle Nebula (Lightweight 60FPS)
       const count = 180;
       const geo = new THREE.BufferGeometry();
       const pos = new Float32Array(count * 3);
@@ -1302,36 +1408,36 @@
       }
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const mat = new THREE.PointsMaterial({
-        color: 0xef4444,
+        color: 0xff2222,
         size: 2.8,
         transparent: true,
-        opacity: 0.7
+        opacity: 0.75
       });
-      const points = new THREE.Points(geo, mat);
-      scene.add(points);
+      const particleField = new THREE.Points(geo, mat);
+      scene.add(particleField);
 
-      // Rotating Wireframe Icosahedron
-      const wireGeo = new THREE.IcosahedronGeometry(75, 1);
-      const wireMat = new THREE.MeshBasicMaterial({
-        color: 0xef4444,
+      // 3D Torus Knot Geometry
+      const torusGeo = new THREE.TorusKnotGeometry(45, 11, 64, 12);
+      const torusMat = new THREE.MeshBasicMaterial({
+        color: 0xff2222,
         wireframe: true,
         transparent: true,
-        opacity: 0.15
+        opacity: 0.16
       });
-      const wireMesh = new THREE.Mesh(wireGeo, wireMat);
-      scene.add(wireMesh);
+      const torusMesh = new THREE.Mesh(torusGeo, torusMat);
+      scene.add(torusMesh);
 
       let mouseX = 0, mouseY = 0;
       window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.0003;
-        mouseY = (e.clientY - window.innerHeight / 2) * 0.0003;
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.0004;
+        mouseY = (e.clientY - window.innerHeight / 2) * 0.0004;
       }, { passive: true });
 
       function animate() {
         requestAnimationFrame(animate);
-        wireMesh.rotation.x += 0.0018 + mouseY * 0.05;
-        wireMesh.rotation.y += 0.0022 + mouseX * 0.05;
-        points.rotation.y -= 0.0006;
+        torusMesh.rotation.x += 0.002 + mouseY * 0.08;
+        torusMesh.rotation.y += 0.0025 + mouseX * 0.08;
+        particleField.rotation.y -= 0.0006;
         renderer.render(scene, camera);
       }
       animate();
@@ -1343,7 +1449,17 @@
       });
     })();
 
-    // Live HUD Timecode simulation
+    // Custom Neon Cyber Cursor Logic
+    const cursor = document.getElementById('cursor');
+    const follower = document.getElementById('follower');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      follower.style.left = e.clientX + 'px';
+      follower.style.top = e.clientY + 'px';
+    });
+
+    // Live HUD Timecode Simulation
     setInterval(() => {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, '0');
@@ -1353,13 +1469,13 @@
       document.getElementById('timecode').innerText = `TC ${h}:${m}:${s}:${f}`;
     }, 100);
 
-    // Filter Logic
+    // Interactive Category Filter Logic
     function applyFilter(cat) {
       const btns = document.querySelectorAll('.filter-btn');
       btns.forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
 
-      const cards = document.querySelectorAll('.card');
+      const cards = document.querySelectorAll('.project-card');
       cards.forEach(card => {
         if (cat === 'all' || card.getAttribute('data-cat') === cat) {
           card.style.display = 'flex';
